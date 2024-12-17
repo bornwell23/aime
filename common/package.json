@@ -1,0 +1,29 @@
+{
+  "name": "@aime/common",
+  "version": "1.0.0",
+  "description": "Shared utilities and common modules for Aime application",
+  "main": "logger.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "aime",
+    "common",
+    "utilities",
+    "logging"
+  ],
+  "author": "Aime Development Team",
+  "license": "MIT",
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "fs-extra": "^11.1.1",
+    "path": "^0.12.7"
+  },
+  "peerDependencies": {
+    "axios": "^1.6.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

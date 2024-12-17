@@ -1,0 +1,29 @@
+services:
+  ui:
+    build: 
+      context: .
+      dockerfile: ui/Dockerfile
+    ports:
+      - "8008:80"
+    depends_on:
+      - server
+    volumes:
+      - /d:/coding/Aime/common:/app/common
+    environment:
+      - VUE_APP_API_URL=http://localhost:3000
+      - VUE_APP_API_VERSION=V1
+      - VUE_APP_LOG_LEVEL=INFO
+
+  server:
+    build: 
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - /d:/coding/Aime/common:/app/common
+    environment:
+      - NODE_ENV=development
+      - BACK_PORT=3000
+
+volumes: {}

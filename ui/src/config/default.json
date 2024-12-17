@@ -1,0 +1,48 @@
+{
+  "theme": {
+    "darkMode": true,
+    "colors": {
+      "light": {
+        "background": "#ffffff",
+        "text": "#333333",
+        "primary": "#007AFF",
+        "secondary": "#34C759",
+        "accent": "#5856D6",
+        "surface": "#f0f0f0",
+        "border": "#dddddd"
+      },
+      "dark": {
+        "background": "#1a1a1a",
+        "text": "#ffffff",
+        "primary": "#0A84FF",
+        "secondary": "#32D74B",
+        "accent": "#5E5CE6",
+        "surface": "#333333",
+        "border": "#444444"
+      }
+    }
+  },
+  "chat": {
+    "defaultModel": "gpt-3.5",
+    "temperature": 70,
+    "maxTokens": 2048,
+    "autoScroll": true,
+    "sendOnEnter": true
+  },
+  "ui": {
+    "fontSize": "medium",
+    "fontSizes": {
+      "small": "14px",
+      "medium": "16px",
+      "large": "18px"
+    },
+    "maxMessageWidth": "800px",
+    "avatarSize": "40px",
+    "messageSpacing": "20px"
+  },
+  "storage": {
+    "saveHistory": true,
+    "maxHistoryItems": 100,
+    "autosaveInterval": 5000
+  }
+}

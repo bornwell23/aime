@@ -1,0 +1,58 @@
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# Dependency directories
+node_modules/
+*.egg-info/
+dist/
+build/
+
+# Environment and virtual environments
+.env
+.venv/
+venv/
+env/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Log files
+*.log
+logs/
+
+# Temporary and backup files
+*.tmp
+*.bak
+.temp/
+
+# Operating system files
+Thumbs.db
+.DS_Store
+
+# Docker and container-related
+.docker/
+*.dockerfile.swp
+
+# Secrets and sensitive files
+*.key
+*.pem
+!.env.example
