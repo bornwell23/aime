@@ -10,7 +10,7 @@ services:
     volumes:
       - /d:/coding/Aime/common:/app/common
     environment:
-      - VUE_APP_API_URL=http://localhost:3000
+      - VUE_APP_API_URL=http://server:3000
       - VUE_APP_API_VERSION=V1
       - VUE_APP_LOG_LEVEL=INFO
 

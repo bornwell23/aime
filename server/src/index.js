@@ -49,10 +49,24 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(port, () => {
+const server = app.listen(port, '0.0.0.0', () => {
     logger.info(`Server started on port ${port}`);
     logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
     logger.info('Aime server is running...');
+    
+    // Log server address details for debugging
+    const address = server.address();
+    logger.info(`Server listening on: ${JSON.stringify(address)}`);
+});
+
+// Override default listening behavior
+server.on('listening', () => {
+    // Explicitly set to listen on 0.0.0.0
+    server.address = () => ({
+        port: port,
+        address: '0.0.0.0',
+        family: 'IPv4'
+    });
 });
 
 export default app;
