@@ -20,8 +20,8 @@ Aime/
 ### Environment Configuration
 Create a `.env` file in the project root with the following variables:
 ```
-FRONT_PORT=8008
-BACK_PORT=3000
+UI_PORT=8008
+SERVER_PORT=3000
 NODE_ENV=development
 VUE_APP_API_VERSION=V1
 VUE_APP_LOG_LEVEL=INFO
@@ -87,6 +87,6 @@ npm start
 - ui is served via Nginx
 - server is a Node.js application
 - Environment variables can be customized in the `.env` file
-- To use a custom url for the frontend instead of localhost:
+- To use a custom url for the ui instead of localhost:
   - c:\Windows\System32\Drivers\etc\hosts
   - `aime localhost`

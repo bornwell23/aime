@@ -12,7 +12,7 @@ dotenv.config();
 // Create logger instance
 const logger = new Logger({
     serviceName: 'server',
-    logLevel: process.env.LOG_LEVEL || 'INFO',
+    logLevel: process.env.VUE_APP_LOG_LEVEL || 'INFO',
     logFileName: 'server.log'
 });
 
@@ -22,6 +22,7 @@ const port = process.env.BACK_PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -50,22 +51,16 @@ app.use((err, req, res, next) => {
 
 // Start server
 const server = app.listen(port, '0.0.0.0', () => {
-    logger.info(`Server started on port ${port}`);
-    logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-    logger.info('Aime server is running...');
-    
-    // Log server address details for debugging
-    const address = server.address();
-    logger.info(`Server listening on: ${JSON.stringify(address)}`);
+    logger.info(`Server running on port ${port}`);
+    logger.info(`Environment: ${process.env.NODE_ENV}`);
 });
 
-// Override default listening behavior
-server.on('listening', () => {
-    // Explicitly set to listen on 0.0.0.0
-    server.address = () => ({
-        port: port,
-        address: '0.0.0.0',
-        family: 'IPv4'
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    logger.info('SIGTERM received. Shutting down gracefully');
+    server.close(() => {
+        logger.info('Server closed');
+        process.exit(0);
     });
 });
 

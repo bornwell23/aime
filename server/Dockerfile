@@ -4,14 +4,24 @@ FROM node:20-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy project files
-COPY . .
+# Copy server project files
+COPY server /app/server
 
-# Set working directory to server
-WORKDIR /app/server
+# Copy common folder 
+COPY common /app/common
+
+# Add a build argument to invalidate cache
+ARG BUILD_DATE
+RUN echo "Build date: ${BUILD_DATE}"
 
 # Install dependencies
+WORKDIR /app/server
 RUN npm ci
+
+# Generate .env file from environment variables
+RUN echo "NODE_ENV=${NODE_ENV}" > .env && \
+    echo "BACK_PORT=${BACK_PORT}" >> .env && \
+    echo "SERVER_LOG_LEVEL=${SERVER_LOG_LEVEL}" >> .env
 
 # Expose port
 EXPOSE 3000

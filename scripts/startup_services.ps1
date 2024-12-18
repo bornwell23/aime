@@ -246,10 +246,10 @@ function Start-AimeApplication {
 
     # Create .env file if it doesn't exist
     if (-not (Test-Path $rootEnvPath)) {
-        Write-Output "FRONT_PORT=8008" | Out-File -FilePath $rootEnvPath -Encoding UTF8
+        Write-Output "UI_PORT=8008" | Out-File -FilePath $rootEnvPath -Encoding UTF8
     }
 
-    # Read FRONT_PORT from .env file
+    # Read UI_PORT from .env file
     $rootEnv = Get-Content $rootEnvPath | ConvertFrom-StringData
 
     if (-not $rootEnv) {
@@ -257,7 +257,7 @@ function Start-AimeApplication {
     }
 
     # Use the port from .env, default to 8008 if not set
-    $uiPort = $rootEnv.FRONT_PORT
+    $uiPort = $rootEnv.UI_PORT
     if (-not $uiPort) {
         $uiPort = 8008
     }

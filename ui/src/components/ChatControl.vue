@@ -25,9 +25,9 @@
 
 <script>
 import { ref, onMounted, onUnmounted } from 'vue';
-import { Logger } from '/app/common/logger.js';
+import { Logger } from '@common/logger.js';
 import SettingsPanel from './SettingsPanel.vue'
-import apiConfig from '@/services/apiConfig';
+import apiConfig from '../services/apiConfig';
 
 export default {
   name: 'ChatControl',
@@ -64,7 +64,7 @@ export default {
 
     // Send message method
     const sendMessage = async () => {
-      if (!inputMessage.value.trim()) {
+      if (inputMessage.value.trim().length === 0) {
         logger.warn('Attempted to send empty message');
         return;
       }
@@ -74,7 +74,7 @@ export default {
         logger.debug(`Message content: ${inputMessage.value}`);
         
         // Use V1 API by default, can switch to V2 easily
-        const apiClient = apiConfig.getClient(apiConfig.VERSIONS.V1);
+        const apiClient = apiConfig.getClient();
         const response = await apiClient.post('/chat', {
           message: inputMessage.value
         });
@@ -89,7 +89,7 @@ export default {
     // Fetch historical messages
     const fetchHistoricalMessages = async (version = 'V1') => {
       try {
-        const apiClient = apiConfig.getClient(version);
+        const apiClient = apiConfig.getClient();
         const response = await apiClient.get('/messages/history');
         historicalMessages.value = response.data;
       } catch (error) {

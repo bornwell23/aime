@@ -11,7 +11,7 @@ module.exports = defineConfig({
   transpileDependencies: true,
   lintOnSave: 'warning',
   devServer: {
-    port: process.env.FRONT_PORT || 8008
+    port: process.env.UI_PORT || 8008
   },
   configureWebpack: {
     devtool: 'source-map',
@@ -19,15 +19,38 @@ module.exports = defineConfig({
       new webpack.ProvidePlugin({
         process: 'process/browser',
         Buffer: ['buffer', 'Buffer']
+      }),
+      new webpack.LoaderOptionsPlugin({
+        options: {
+          resolve: {
+            fallback: {
+              "fs": false,
+              "path": require.resolve("path-browserify"),
+              "assert": require.resolve("assert/"),
+              "stream": require.resolve("stream-browserify")
+            }
+          }
+        }
       })
     ],
     resolve: {
-      fallback: {
-        "fs": false,
-        "path": require.resolve("path-browserify"),
-        "assert": require.resolve("assert/"),
-        "stream": require.resolve("stream-browserify")
-      }
+      alias: {
+        '@stores': path.resolve(__dirname, 'src/stores'),
+        '@common': path.resolve(__dirname, '../common')
+      },
+      extensions: ['.js', '.ts', '.vue', '.json']
+    },
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          loader: 'ts-loader',
+          options: {
+            transpileOnly: true,
+            appendTsSuffixTo: ['\\.vue$']
+          }
+        }
+      ]
     }
   }
 })

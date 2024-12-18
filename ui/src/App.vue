@@ -1,55 +1,58 @@
 <template>
-  <div id="app" :class="{ 'dark-theme': isDarkMode }">
-    <router-view />
-    <NavigationBar />
+  <div id="app" class="min-h-screen bg-gray-100">
+    <AuthGuard>
+      <div class="container mx-auto p-6">
+        <header class="bg-white shadow-md rounded-lg p-4 mb-6">
+          <h1 class="text-2xl font-bold text-gray-800">
+            Welcome to the Application
+          </h1>
+        </header>
+        
+        <main>
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">
+              Authenticated Content
+            </h2>
+            <p>You are now logged in and can access protected features.</p>
+            
+            <button 
+              @click="logout" 
+              class="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+              Logout
+            </button>
+          </div>
+        </main>
+      </div>
+    </AuthGuard>
   </div>
 </template>
 
-<script>
-import NavigationBar from '@/components/NavigationBar.vue'
-import { configManager } from '@/config/configManager'
+<script lang="ts">
+import { useAuthStore } from '@stores/authStore';
+import AuthGuard from './components/AuthGuard.vue';
 
 export default {
   name: 'App',
   components: {
-    NavigationBar
+    AuthGuard
   },
-  data() {
-    return {
-      isDarkMode: configManager.getConfig('theme.darkMode')
-    }
-  },
-  created() {
-    // Watch for theme changes
-    window.addEventListener('storage', (event) => {
-      if (event.key === 'aimeConfig') {
-        const config = JSON.parse(event.newValue)
-        this.isDarkMode = config.theme.darkMode
-      }
-    })
+  setup() {
+    const authStore = useAuthStore();
+    
+    const logout = () => {
+      authStore.logout();
+    };
 
-    // Listen for custom event from configManager
-    window.addEventListener('themeChanged', (event) => {
-      this.isDarkMode = event.detail.darkMode
-    })
+    return {
+      logout
+    };
   }
-}
+};
 </script>
 
 <style>
-#app {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  min-height: 100vh;
-}
-
-/* Icon styles */
-.fas, .far, .fab {
-  display: inline-block;
-  line-height: 1;
-  vertical-align: middle;
-  margin-right: var(--spacing-xs);
-}
+/* Global styles or imports */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 </style>

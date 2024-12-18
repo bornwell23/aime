@@ -25,25 +25,25 @@ if not exist "node_modules\" (
 :: Check if .env file exists in project root
 if not exist "..\\.env" (
     echo .env file not found in project root. Creating with default settings.
-    echo FRONT_PORT=8008 > "..\\.env"
+    echo UI_PORT=8008 > "..\\.env"
 )
 
-:: Read FRONT_PORT from .env file
-for /f "tokens=2 delims==" %%a in ('findstr /i "FRONT_PORT" "..\\.env"') do set FRONT_PORT=%%a
+:: Read UI_PORT from .env file
+for /f "tokens=2 delims==" %%a in ('findstr /i "UI_PORT" "..\\.env"') do set UI_PORT=%%a
 
 :: Check if serve is running on the specified port
-netstat -ano | findstr ":%FRONT_PORT%" >nul
+netstat -ano | findstr ":%UI_PORT%" >nul
 if %errorlevel% equ 0 (
-    echo Port %FRONT_PORT% is already in use. Please free up the port and try again.
+    echo Port %UI_PORT% is already in use. Please free up the port and try again.
     pause
     exit /b 1
 )
 
 :: Start the development server
 echo Starting development server...
-start "" http://localhost:%FRONT_PORT%
+start "" http://localhost:%UI_PORT%
 npm run serve
 
 echo.
-echo If the browser doesn't open automatically, visit: http://localhost:%FRONT_PORT%
+echo If the browser doesn't open automatically, visit: http://localhost:%UI_PORT%
 pause

@@ -4,7 +4,7 @@ import v1Router from './v1/index.js';
 
 const logger = new Logger({
     serviceName: 'api-router',
-    logLevel: process.env.LOG_LEVEL || 'INFO',
+    logLevel: process.env.VUE_APP_LOG_LEVEL || 'INFO',
     logFileName: 'api.log'
 });
 

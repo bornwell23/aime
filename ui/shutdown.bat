@@ -4,11 +4,11 @@ setlocal enabledelayedexpansion
 :: Check if .env file exists in project root
 if not exist "..\\.env" (
     echo .env file not found in project root. Creating with default settings.
-    echo FRONT_PORT=8008 > "..\\.env"
+    echo UI_PORT=8008 > "..\\.env"
 )
 
-:: Read FRONT_PORT from .env file
-for /f "tokens=2 delims==" %%a in ('findstr /i "FRONT_PORT" "..\\.env"') do set FRONT_PORT=%%a
+:: Read UI_PORT from .env file
+for /f "tokens=2 delims==" %%a in ('findstr /i "UI_PORT" "..\\.env"') do set UI_PORT=%%a
 
 :: Kill Node.js processes
 echo Stopping Node.js processes...
@@ -20,11 +20,11 @@ if %errorlevel% equ 0 (
 )
 
 :: Double check specified port
-for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":%FRONT_PORT%"') do (
-    echo Found process on port %FRONT_PORT% with PID: %%a
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":%UI_PORT%"') do (
+    echo Found process on port %UI_PORT% with PID: %%a
     taskkill /F /PID %%a
     if %errorlevel% equ 0 (
-        echo Successfully stopped process on port %FRONT_PORT%.
+        echo Successfully stopped process on port %UI_PORT%.
     )
 )
 

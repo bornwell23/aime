@@ -4,14 +4,14 @@ setlocal enabledelayedexpansion
 :: Check if .env file exists in project root
 if not exist "..\\.env" (
     echo .env file not found in project root. Creating with default settings.
-    echo FRONT_PORT=8008 > "..\\.env"
+    echo UI_PORT=8008 > "..\\.env"
 )
 
-:: Read FRONT_PORT from .env file
-for /f "tokens=2 delims==" %%a in ('findstr /i "FRONT_PORT" "..\\.env"') do set FRONT_PORT=%%a
+:: Read UI_PORT from .env file
+for /f "tokens=2 delims==" %%a in ('findstr /i "UI_PORT" "..\\.env"') do set UI_PORT=%%a
 
 :: Set default URL
-set "URL=http://localhost:%FRONT_PORT%"
+set "URL=http://localhost:%UI_PORT%"
 
 :: Default browser is Chrome
 set "BROWSER=chrome"
@@ -30,9 +30,9 @@ if not "%~1"=="" (
 )
 
 :: Check if the server is running
-netstat -ano | findstr ":%FRONT_PORT%" >nul
+netstat -ano | findstr ":%UI_PORT%" >nul
 if %errorlevel% neq 0 (
-    echo ui server is not running on port %FRONT_PORT%.
+    echo ui server is not running on port %UI_PORT%.
     echo Please start the server first using startup.bat
     pause
     exit /b 1

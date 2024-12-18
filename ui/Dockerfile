@@ -1,13 +1,20 @@
 # Build stage
-FROM node:18-alpine AS build
+FROM node:20-alpine AS build
 
 # Set working directory
 WORKDIR /app
 
-# Copy project files
-COPY . .
+# Copy common folder first
+COPY common /app/common
 
-# Set working directory to ui
+# Copy UI project files
+COPY ui /app/ui
+
+# Add a build argument to invalidate cache
+ARG BUILD_DATE
+RUN echo "Build date: ${BUILD_DATE}"
+
+# Set working directory to the ui to run npm correctly
 WORKDIR /app/ui
 
 # Install dependencies
@@ -25,8 +32,13 @@ COPY --from=build /app/ui/dist /usr/share/nginx/html
 # Copy common directory to production stage
 COPY --from=build /app/common /app/common
 
-# Copy custom nginx configuration
-COPY ui/nginx.conf /etc/nginx/conf.d/default.conf
+# Copy nginx configuration
+COPY ui/nginx/default.conf /etc/nginx/conf.d/default.conf
+
+# Generate .env file from environment variables
+RUN echo "VUE_APP_API_URL=${VUE_APP_API_URL}" > /usr/share/nginx/html/.env && \
+    echo "VUE_APP_API_VERSION=${VUE_APP_API_VERSION}" >> /usr/share/nginx/html/.env && \
+    echo "VUE_APP_LOG_LEVEL=${VUE_APP_LOG_LEVEL}" >> /usr/share/nginx/html/.env
 
 # Expose port
 EXPOSE 80

@@ -3,27 +3,65 @@ services:
     build: 
       context: .
       dockerfile: ui/Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE:-default}
     ports:
       - "8008:80"
     depends_on:
       - server
-    volumes:
-      - /d:/coding/Aime/common:/app/common
     environment:
+      - NODE_ENV=production
       - VUE_APP_API_URL=http://server:3000
-      - VUE_APP_API_VERSION=V1
-      - VUE_APP_LOG_LEVEL=INFO
 
   server:
     build: 
       context: .
       dockerfile: server/Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE:-default}
     ports:
       - "3000:3000"
-    volumes:
-      - /d:/coding/Aime/common:/app/common
+    depends_on:
+      - auth-service
     environment:
       - NODE_ENV=development
       - BACK_PORT=3000
+      - SERVER_LOG_LEVEL=DEBUG
 
-volumes: {}
+  auth-service:
+    build: 
+      context: .
+      dockerfile: auth-service/Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE:-default}
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://aime_admin:aime_password@postgres/aime_auth
+      - AUTH_SERVICE_SECRET_KEY=2f763e3b0f490c021c61d0c23d42e4404309e12564c1526e01378d26c05464b7
+      - AUTH_SERVICE_ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=1440
+      - REFRESH_TOKEN_EXPIRE_MINUTES=1440
+      - LOG_LEVEL=DEBUG
+      - LOG_FORMAT=json
+      - PASSWORD_MIN_LENGTH=8
+      - PASSWORD_REQUIRE_SPECIAL_CHARS=true
+      - PASSWORD_REQUIRE_NUMBERS=true
+    ports:
+      - "8000:8000"
+    restart: always
+  
+  postgres:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=aime_auth
+      - POSTGRES_USER=aime_admin
+      - POSTGRES_PASSWORD=aime_password
+    ports:
+      - "5432:5432"
+    restart: always
+
+volumes:
+  postgres_data:

@@ -2,7 +2,7 @@ import { Logger } from '/app/common/logger.js';
 
 const logger = new Logger({
     serviceName: 'error-middleware',
-    logLevel: process.env.LOG_LEVEL || 'INFO'
+    logLevel: process.env.VUE_APP_LOG_LEVEL || 'INFO'
 });
 
 export const errorHandler = (err, req, res, next) => {

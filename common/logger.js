@@ -2,8 +2,9 @@
 class Logger {
   constructor({
     serviceName = 'default', 
-    logLevel = 'INFO', 
-    logToConsole = true
+    logLevel = process.env.VUE_APP_LOG_LEVEL || 'INFO', 
+    logToConsole = true,
+    sendRemoteLog = false,
   }) {
     this.serviceName = serviceName;
     this.logLevel = logLevel.toUpperCase();
@@ -17,6 +18,7 @@ class Logger {
     };
 
     this.logToConsole = logToConsole;
+    this.sendRemoteLog = sendRemoteLog;
   }
 
   // Internal method to format log message
@@ -50,7 +52,9 @@ class Logger {
       }
 
       // Optional: Send logs to a remote logging service
-      this._sendRemoteLog(level, formattedMessage);
+      if (this.sendRemoteLog) {
+        this._sendRemoteLog(level, formattedMessage);
+      }
     }
   }
 
