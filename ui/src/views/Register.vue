@@ -100,7 +100,9 @@
 
 <script>
 import { register } from '@/services/apiConfig';
-import logger from '../../../common/logger';
+import { Logger } from '/app/common/logger.js';
+
+const logger = new Logger('RegisterView');
 
 export default {
   name: 'RegisterView',

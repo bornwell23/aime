@@ -25,12 +25,10 @@
 
 <script>
 import { ref, onMounted, onUnmounted } from 'vue';
-import { Logger } from '@common/logger.js';
+import { Logger } from '/app/common/logger.js';
 import SettingsPanel from './SettingsPanel.vue'
 import apiConfig from '../services/apiConfig';
-import { Definitions } from '/app/common/definitions.js';
-
-const definitions = new Definitions();
+import { definitions } from '/app/common/definitions.js';
 
 export default {
   name: 'ChatControl',

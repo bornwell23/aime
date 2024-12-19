@@ -1,8 +1,8 @@
 import express from 'express';
-import { ExampleController } from '../../../controllers/example.controller.js';
+import { BaseController } from '../controllers/base.js';
 
 const router = express.Router();
-const controller = new ExampleController();
+const controller = new BaseController();
 
 router.get('/', controller.getAll);
 router.get('/:id', controller.getById);

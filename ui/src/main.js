@@ -2,14 +2,12 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
-import { Logger } from '@common/logger.js'
-import { Definitions } from '/app/common/definitions.js';
+import { Logger } from '/app/common/logger.js'
+import { definitions } from '/app/common/definitions.js';
 
 import '@fortawesome/fontawesome-free/css/all.css'
 import '@/assets/styles/theme.css'
 import './index.css'
-
-const definitions = new Definitions();
 
 // Create global logger
 const logger = new Logger({

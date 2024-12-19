@@ -4,8 +4,8 @@ import {
   AuthState, 
   LoginErrorResponse,
   User
-} from '../../../common/types';
-import { Logger } from '../../../common/logger.js';
+} from '/app/common/types';
+import { Logger } from '/app/common/logger.js';
 
 // Create logger
 const logger = new Logger({ 

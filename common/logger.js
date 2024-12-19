@@ -1,7 +1,5 @@
 // Browser-compatible logging utility
-import { Definitions } from '/app/common/definitions.js';
-
-const definitions = new Definitions();
+import { definitions } from '/app/common/definitions.js';
 
 class Logger {
   constructor({
@@ -23,6 +21,16 @@ class Logger {
 
     this.logToConsole = logToConsole;
     this.sendRemoteLog = sendRemoteLog;
+  }
+
+  // Static method to create a logger instance
+  static create(options = {}) {
+    return new Logger({
+      serviceName: options.serviceName || 'default',
+      logLevel: options.logLevel,
+      logToConsole: options.logToConsole ?? true,
+      sendRemoteLog: options.sendRemoteLog ?? false
+    });
   }
 
   // Internal method to format log message

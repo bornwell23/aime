@@ -7,6 +7,7 @@
 
 <script>
 import axios from 'axios'
+import { definitions } from '/app/common/definitions.js';
 
 export default {
   name: 'HomeView',
@@ -17,8 +18,9 @@ export default {
   },
   async created() {
     try {
-      const response = await axios.get('http://localhost:3000')
+      const response = await axios.get(`http://${definitions.api.serviceName}:${definitions.api.port}/health`)
       this.message = response.data.message
+      console.log(`Received data from server: ${this.message}`)
     } catch (error) {
       console.error('Error fetching data:', error)
       this.message = 'Error connecting to server'

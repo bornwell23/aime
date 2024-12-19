@@ -1,6 +1,5 @@
 import { version } from "os";
 import { versions } from "process";
-import v1Router from '@/server/src/api/v1/index.js';
 
 class Definitions {
     constructor() {
@@ -40,4 +39,14 @@ class Definitions {
     }
 }
 
-export { Definitions };
+
+
+var tempDefinitions = new Definitions();
+
+import v1Router from '/app/common/api/v1/index.js';
+
+tempDefinitions.api.routers['v1'] = v1Router;
+
+const definitions = tempDefinitions;
+
+export { definitions };

@@ -1,14 +1,13 @@
+import { definitions } from '/app/common/definitions.js';
+
 import { Logger } from '/app/common/logger.js';
-import { Definitions } from '/app/common/definitions.js';
 
-const definitions = new Definitions();
-
-const logger = new Logger({
-    serviceName: 'example-controller',
+const logger = Logger.create({
+    serviceName: 'base-controller',
     logLevel: definitions.server.logLevel || 'INFO'
 });
 
-export class ExampleController {
+export class BaseController {
     async getAll(req, res) {
         try {
             logger.info('Fetching all items');

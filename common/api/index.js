@@ -1,9 +1,7 @@
 import express from 'express';
 import { Logger } from '/app/common/logger.js';
 import v1Router from './v1/index.js';
-import { Definitions } from '/app/common/definitions.js';
-
-const definitions = new Definitions();
+import { definitions } from '/app/common/definitions.js';
 
 const logger = new Logger({
     serviceName: 'api-router',

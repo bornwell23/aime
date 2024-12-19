@@ -1,8 +1,6 @@
 import axios from 'axios';
-import { Logger } from '../../../common/logger.js';
-import { Definitions } from '/app/common/definitions.js';
-
-const definitions = new Definitions();
+import { Logger } from '/app/common/logger.js';
+import { definitions } from '/app/common/definitions.js';
 
 // Create logger instance
 const logger = new Logger({

@@ -75,7 +75,7 @@
 
 <script>
 import { login } from '@/services/apiConfig';
-import { Logger } from '@common/logger.js';
+import { Logger } from '/app/common/logger.js';
 
 const logger = new Logger('LoginView');
 

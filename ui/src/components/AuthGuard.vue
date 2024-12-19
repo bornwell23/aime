@@ -22,7 +22,7 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
 import { getCurrentUser } from '@/services/apiConfig';
-import { Logger } from '@common/logger.js';
+import { Logger } from '/app/common/logger.js';
 import Login from '@/views/Login.vue';
 import Register from '@/views/Register.vue';
 

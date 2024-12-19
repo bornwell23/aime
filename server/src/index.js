@@ -2,11 +2,9 @@ import express from 'express';
 import cors from 'cors';
 
 import { Logger } from '/app/common/logger.js';
-import { Definitions } from '/app/common/definitions.js';
-import apiRouter from './api/index.js';
+import { definitions } from '/app/common/definitions.js';
+import apiRouter from '/app/common/api/index.js';
 import { errorHandler } from './middleware/error.middleware.js';
-
-const definitions = new Definitions();
 
 // Create logger instance
 const logger = new Logger({

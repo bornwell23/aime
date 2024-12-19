@@ -1,7 +1,5 @@
 import { Logger } from '/app/common/logger.js';
-import { Definitions } from '/app/common/definitions.js';
-
-const definitions = new Definitions();
+import { definitions } from '/app/common/definitions.js';
 
 const logger = new Logger({
     serviceName: 'error-middleware',

@@ -1,9 +1,7 @@
-import { Definitions } from '/app/common/definitions.js';
+import { definitions } from '/app/common/definitions.js';
 const { defineConfig } = require('@vue/cli-service')
 const webpack = require('webpack')
 const path = require('path')
-
-const definitions = new Definitions();
 
 module.exports = defineConfig({
   transpileDependencies: true,
@@ -34,7 +32,7 @@ module.exports = defineConfig({
     resolve: {
       alias: {
         '@stores': path.resolve(__dirname, 'src/stores'),
-        '@common': path.resolve(__dirname, '../common')
+        '@common': path.resolve('/app/common')
       },
       extensions: ['.js', '.ts', '.vue', '.json']
     },

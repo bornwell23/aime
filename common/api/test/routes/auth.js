@@ -1,9 +1,7 @@
 import express from 'express';
 import axios from 'axios';
 import { Logger } from '/app/common/logger.js';
-import { Definitions } from '/app/common/definitions.js';
-
-const definitions = new Definitions();
+import { definitions } from '/app/common/definitions.js';
 
 const router = express.Router();
 const logger = new Logger({
