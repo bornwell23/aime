@@ -1,30 +1,51 @@
 <template>
   <div>
-    <LoginModal 
-      v-if="!isAuthenticated" 
-      @login="login" 
-      @close="logout"
-    />
-    <slot v-if="isAuthenticated"></slot>
+    <router-view v-slot="{ Component }">
+      <template v-if="!isAuthenticated && Component !== Register">
+        <Login 
+          v-if="Component === Login"
+          :firstTimeUser="!hasEverLoggedIn"
+        />
+        <component 
+          v-else 
+          :is="Component"
+        />
+      </template>
+      <component 
+        v-else 
+        :is="Component"
+      />
+    </router-view>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
-import { getCurrentUser, login, logout } from '@/services/apiConfig';
+import { getCurrentUser } from '@/services/apiConfig';
 import { Logger } from '@common/logger.js';
-import LoginModal from './LoginModal.vue';
+import Login from '@/views/Login.vue';
+import Register from '@/views/Register.vue';
 
 const logger = new Logger('AuthGuard');
 
 export default defineComponent({
   name: 'AuthGuard',
+  components: {
+    Login,
+    Register
+  },
   setup() {
     const isAuthenticated = ref(false);
     const currentUser = ref(null);
+    const hasEverLoggedIn = ref(false);
 
     const checkAuthentication = async () => {
       const token = localStorage.getItem('authToken');
+      const previousLoginAttempts = localStorage.getItem('loginAttempts');
+      
+      // Check if there have been any previous login attempts
+      hasEverLoggedIn.value = !!previousLoginAttempts;
+
       if (!token) {
         isAuthenticated.value = false;
         currentUser.value = null;
@@ -35,6 +56,10 @@ export default defineComponent({
         const response = await getCurrentUser();
         currentUser.value = response.data;
         isAuthenticated.value = true;
+        
+        // Mark that a successful login has occurred
+        localStorage.setItem('loginAttempts', 'true');
+        
         logger.info('User authenticated successfully');
       } catch (error) {
         // Clear token if getCurrentUser fails
@@ -49,26 +74,8 @@ export default defineComponent({
 
     return {
       isAuthenticated,
-      currentUser,
-      login: async (username: string, password: string) => {
-        try {
-          await login(username, password);
-          await checkAuthentication();
-        } catch (error) {
-          logger.error('Login failed', error);
-          throw error;
-        }
-      },
-      logout: () => {
-        localStorage.removeItem('authToken');
-        isAuthenticated.value = false;
-        currentUser.value = null;
-        logout();
-      }
+      hasEverLoggedIn
     };
-  },
-  components: {
-    LoginModal
   }
 });
 </script>

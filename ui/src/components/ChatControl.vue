@@ -28,6 +28,9 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { Logger } from '@common/logger.js';
 import SettingsPanel from './SettingsPanel.vue'
 import apiConfig from '../services/apiConfig';
+import { Definitions } from '/app/common/definitions.js';
+
+const definitions = new Definitions();
 
 export default {
   name: 'ChatControl',
@@ -37,8 +40,8 @@ export default {
   setup() {
     const logger = new Logger({
       serviceName: 'chat-control',
-      logLevel: process.env.VUE_APP_LOG_LEVEL || 'INFO',
-      logFileName: 'ui.log'
+      logLevel: definitions.ui.logLevel || 'INFO',
+      logFileName: definitions.ui.logFileName || 'ui.log'
     });
 
     // Reactive variables
@@ -73,7 +76,6 @@ export default {
         logger.info('Sending chat message');
         logger.debug(`Message content: ${inputMessage.value}`);
         
-        // Use V1 API by default, can switch to V2 easily
         const apiClient = apiConfig.getClient();
         const response = await apiClient.post('/chat', {
           message: inputMessage.value
@@ -87,7 +89,7 @@ export default {
     };
 
     // Fetch historical messages
-    const fetchHistoricalMessages = async (version = 'V1') => {
+    const fetchHistoricalMessages = async () => {
       try {
         const apiClient = apiConfig.getClient();
         const response = await apiClient.get('/messages/history');

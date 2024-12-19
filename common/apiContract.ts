@@ -47,6 +47,22 @@ export function createApiClient(baseUrl: string): ApiContract {
         });
         return response.json();
       },
+      async register(request) {
+        const response = await fetch(`${baseUrl}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(request)
+        });
+        return response.json();
+      },
+      async refreshToken(refreshToken) {
+        const response = await fetch(`${baseUrl}/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken })
+        });
+        return response.json();
+      },
       // Implement other auth methods similarly
     },
     users: {

@@ -13,6 +13,7 @@
           minlength="3" 
           maxlength="50"
           placeholder="Choose a username"
+          @input="resetError"
         />
       </div>
       
@@ -24,6 +25,7 @@
           v-model="email" 
           required 
           placeholder="Enter your email"
+          @input="resetError"
         />
       </div>
       
@@ -34,10 +36,8 @@
           id="password" 
           v-model="password" 
           required 
-          minlength="8"
-          pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-          title="Password must be at least 8 characters long and include uppercase, lowercase, number, and special character"
           placeholder="Create a strong password"
+          @input="resetError"
         />
         <button 
           type="button" 
@@ -46,6 +46,12 @@
         >
           {{ showPassword ? 'Hide' : 'Show' }}
         </button>
+        <div 
+          v-if="error" 
+          class="error-message"
+        >
+          {{ error }}
+        </div>
       </div>
       
       <div class="form-group">
@@ -56,6 +62,7 @@
           v-model="confirmPassword" 
           required 
           placeholder="Repeat your password"
+          @input="resetError"
         />
         <button 
           type="button" 
@@ -68,6 +75,11 @@
       
       <div v-if="error" class="error-message">
         {{ error }}
+      </div>
+
+      <div class="password-requirements">
+        Password must be at least 8 characters and include uppercase, lowercase, number, and special character
+        </br>
       </div>
       
       <button 
@@ -111,6 +123,9 @@ export default {
     toggleConfirmPasswordVisibility() {
       this.showConfirmPassword = !this.showConfirmPassword;
     },
+    resetError() {
+      this.error = null;
+    },
     validateForm() {
       // Clear previous errors
       this.error = null;
@@ -122,9 +137,31 @@ export default {
       }
 
       // Validate password complexity
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&-=+])[A-Za-z\d@$!%*?&-=+]{8,}$/;
       if (!passwordRegex.test(this.password)) {
         this.error = 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character';
+        // At least 8 characters long
+        const characterLengthRegex = /^.{8,}$/;
+        // At least one uppercase letter
+        const uppercaseRegex = /^(?=.*[A-Z])/;
+        // At least one lowercase letter
+        const lowercaseRegex = /^(?=.*[a-z])/;
+        // At least one number
+        const numberRegex = /^(?=.*\d)/;
+        // At least one special character (one of @, $, !, %, *, ?, &, -, =, +)
+        const specialCharacterRegex = /^(?=.*[@$!%*?&-=+])/;
+
+        if (!characterLengthRegex.test(this.password)) {
+          this.error = 'Password must be at least 8 characters long';
+        } else if (!uppercaseRegex.test(this.password)) {
+          this.error = 'Password must include at least one uppercase letter';
+        } else if (!lowercaseRegex.test(this.password)) {
+          this.error = 'Password must include at least one lowercase letter';
+        } else if (!numberRegex.test(this.password)) {
+          this.error = 'Password must include at least one number';
+        } else if (!specialCharacterRegex.test(this.password)) {
+          this.error = 'Password must include at least one special character';
+        }
         return false;
       }
 
@@ -133,6 +170,7 @@ export default {
     async handleRegister() {
       // Validate form before submission
       if (!this.validateForm()) {
+        logger.error('Failed to register due to invalid form');
         return;
       }
 

@@ -12,7 +12,7 @@ router.use('/auth', authRoutes);
 
 // Health check endpoint
 router.get('/health', (req, res) => {
-    res.json({ status: 'healthy', version: 'v1' });
+    res.json({ status: 'healthy', version: 'test' });
 });
 
 export default router;

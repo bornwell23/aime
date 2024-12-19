@@ -1,23 +1,22 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 
 import { Logger } from '/app/common/logger.js';
+import { Definitions } from '/app/common/definitions.js';
 import apiRouter from './api/index.js';
 import { errorHandler } from './middleware/error.middleware.js';
 
-// Load environment variables
-dotenv.config();
+const definitions = new Definitions();
 
 // Create logger instance
 const logger = new Logger({
-    serviceName: 'server',
-    logLevel: process.env.VUE_APP_LOG_LEVEL || 'INFO',
-    logFileName: 'server.log'
+    serviceName: definitions.server.serviceName || 'server',
+    logLevel: definitions.server.logLevel || 'INFO',
+    logFileName: definitions.server.logFileName || 'server.log'
 });
 
 const app = express();
-const port = process.env.BACK_PORT || 3000;
+const port = definitions.server.port || 3000;
 
 // Middleware
 app.use(cors());
@@ -38,8 +37,8 @@ app.get('/', (req, res) => {
     logger.info('Base route accessed');
     res.json({
         message: 'Welcome to Aime API',
-        documentation: '/api/v1/docs',
-        health: '/api/v1/health'
+        documentation: `/api/${definitions.api.version}/docs`,
+        health: `/api/${definitions.api.version}/health`
     });
 });
 
@@ -52,7 +51,7 @@ app.use((err, req, res, next) => {
 // Start server
 const server = app.listen(port, '0.0.0.0', () => {
     logger.info(`Server running on port ${port}`);
-    logger.info(`Environment: ${process.env.NODE_ENV}`);
+    logger.info(`Environment: ${definitions.server.node_env}`);
 });
 
 // Graceful shutdown

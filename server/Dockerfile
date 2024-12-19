@@ -18,11 +18,6 @@ RUN echo "Build date: ${BUILD_DATE}"
 WORKDIR /app/server
 RUN npm ci
 
-# Generate .env file from environment variables
-RUN echo "NODE_ENV=${NODE_ENV}" > .env && \
-    echo "BACK_PORT=${BACK_PORT}" >> .env && \
-    echo "SERVER_LOG_LEVEL=${SERVER_LOG_LEVEL}" >> .env
-
 # Expose port
 EXPOSE 3000
 

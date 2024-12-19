@@ -17,16 +17,6 @@ Aime/
 - Docker
 - Docker Compose
 
-### Environment Configuration
-Create a `.env` file in the project root with the following variables:
-```
-UI_PORT=8008
-SERVER_PORT=3000
-NODE_ENV=development
-VUE_APP_API_VERSION=V1
-VUE_APP_LOG_LEVEL=INFO
-```
-
 ### Running the Application
 
 #### Development Mode
@@ -86,7 +76,7 @@ npm start
 - The application uses multi-stage Docker builds
 - ui is served via Nginx
 - server is a Node.js application
-- Environment variables can be customized in the `.env` file
+- Environment variables can be customized in the environment or a `.env` file
 - To use a custom url for the ui instead of localhost:
   - c:\Windows\System32\Drivers\etc\hosts
   - `aime localhost`

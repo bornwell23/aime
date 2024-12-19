@@ -1,5 +1,8 @@
 import axios from 'axios';
 import { Logger } from '../../../common/logger.js';
+import { Definitions } from '/app/common/definitions.js';
+
+const definitions = new Definitions();
 
 // Create logger instance
 const logger = new Logger({
@@ -7,22 +10,18 @@ const logger = new Logger({
   logLevel: 'DEBUG'
 });
 
-// API Versions
-const API_VERSIONS = {
-  V1: '/api/v1',
-  V2: '/api/v2',
-  // Add more versions as needed
-};
 
 // Default API version
-const DEFAULT_VERSION = process.env.VUE_APP_API_VERSION || 'V1';
+const DEFAULT_VERSION = definitions.api.version || 'V1';
 logger.debug(`Default API version: ${DEFAULT_VERSION}`);
 
+const defaultApiUrl = `${definitions.server.api_url}/api/${definitions.api.version}`;
+
 // Base configuration for API client
-export function createApiClient(baseURL) {
+export function createApiClient(url) {
   const instance = axios.create({
-    baseURL: baseURL,
-    timeout: 10000,
+    baseURL: url,
+    timeout: definitions.api.timeout,
     headers: {
       'Content-Type': 'application/json',
     }
@@ -81,14 +80,14 @@ export function createApiClient(baseURL) {
 export async function login(username, password) {
   try {
     // Use server as the proxy for auth-service
-    const authClient = createApiClient(process.env.VUE_APP_API_URL);
+    const authClient = createApiClient(defaultApiUrl);
     
     // Use FormData to match FastAPI's OAuth2PasswordRequestForm
     const formData = new URLSearchParams();
     formData.append('username', username);
     formData.append('password', password);
 
-    const response = await authClient.post('/v1/auth/token', formData, {
+    const response = await authClient.post('/auth/token', formData, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
@@ -109,8 +108,9 @@ export async function login(username, password) {
 
 export async function register(username, email, password) {
   try {
-    const authClient = createApiClient(process.env.VUE_APP_API_URL);
-    
+    logger.info(`Attempting to register user: ${username}`);
+    const authClient = createApiClient(defaultApiUrl);
+    logger.info(`Sending registration data: ${JSON.stringify({ username, email, password })} to server at ${definitions.server.api_url}`);
     return authClient.post('/auth/register', {
       username,
       email,
@@ -119,7 +119,7 @@ export async function register(username, email, password) {
       logger.info(`User ${username} registered successfully`);
       return response.data;
     }).catch(error => {
-      logger.error('Registration failed', error);
+      logger.error('Registration post failed', error);
       throw error;
     });
   } catch (error) {
@@ -130,7 +130,7 @@ export async function register(username, email, password) {
 
 export async function refreshAuthentication() {
   try {
-    const authClient = createApiClient(process.env.VUE_APP_API_URL);
+    const authClient = createApiClient(defaultApiUrl);
     const currentToken = localStorage.getItem('authToken');
     
     // Validate current token or request a new one
@@ -147,10 +147,10 @@ export async function refreshAuthentication() {
 
 export function logout() {
   try {
-    const authClient = createApiClient(process.env.VUE_APP_API_URL);
+    const authClient = createApiClient(defaultApiUrl);
     
     // Call server logout endpoint to invalidate token
-    return authClient.post('/v1/auth/logout');
+    return authClient.post(`/auth/logout`);
   } catch (error) {
     logger.error('Logout failed', error);
     throw error;
@@ -163,16 +163,15 @@ export function logout() {
 
 export function getCurrentUser() {
   try {
-    const authClient = createApiClient(process.env.VUE_APP_API_URL);
-    return authClient.get('/users/me');
+    const authClient = createApiClient(defaultApiUrl);
+    return authClient.get(`/users/me`);
   } catch (error) {
     logger.error('Failed to fetch current user', error);
     throw error;
   }
 }
 
-// Export API client creator and version constants
+// Export API client creator
 export default {
-  getClient: (version = DEFAULT_VERSION) => createApiClient(`${process.env.VUE_APP_API_URL}${API_VERSIONS[version]}`),
-  VERSIONS: API_VERSIONS,
+  getClient: (api = null) => createApiClient(api == null ? defaultApiUrl : api)
 };

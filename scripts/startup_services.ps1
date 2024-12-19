@@ -244,12 +244,7 @@ function Start-AimeApplication {
 
     $rootEnvPath = Join-Path -Path $PSScriptRoot "\..\\.env"
 
-    # Create .env file if it doesn't exist
-    if (-not (Test-Path $rootEnvPath)) {
-        Write-Output "UI_PORT=8008" | Out-File -FilePath $rootEnvPath -Encoding UTF8
-    }
-
-    # Read UI_PORT from .env file
+    # Read UI_PORT from .env file if it exists
     $rootEnv = Get-Content $rootEnvPath | ConvertFrom-StringData
 
     if (-not $rootEnv) {

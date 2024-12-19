@@ -1,8 +1,11 @@
 import { Logger } from '/app/common/logger.js';
+import { Definitions } from '/app/common/definitions.js';
+
+const definitions = new Definitions();
 
 const logger = new Logger({
     serviceName: 'example-controller',
-    logLevel: process.env.VUE_APP_LOG_LEVEL || 'INFO'
+    logLevel: definitions.server.logLevel || 'INFO'
 });
 
 export class ExampleController {

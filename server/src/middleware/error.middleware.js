@@ -1,13 +1,16 @@
 import { Logger } from '/app/common/logger.js';
+import { Definitions } from '/app/common/definitions.js';
+
+const definitions = new Definitions();
 
 const logger = new Logger({
     serviceName: 'error-middleware',
-    logLevel: process.env.VUE_APP_LOG_LEVEL || 'INFO'
+    logLevel: definitions.server.logLevel || 'INFO'
 });
 
 export const errorHandler = (err, req, res, next) => {
     // Log the full error stack in development
-    if (process.env.NODE_ENV === 'development') {
+    if (definitions.server.node_env === 'development') {
         logger.error(`Full error stack: ${err.stack}`);
     }
 
@@ -33,6 +36,6 @@ export const errorHandler = (err, req, res, next) => {
     // Generic server error
     res.status(500).json({
         error: 'Internal Server Error',
-        details: process.env.NODE_ENV === 'development' ? err.message : 'An unexpected error occurred'
+        details: definitions.server.node_env === 'development' ? err.message : 'An unexpected error occurred'
     });
 };

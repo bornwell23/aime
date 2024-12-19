@@ -26,7 +26,6 @@ docker run -d ^
     --name aime-auth-service ^
     --network aime-network ^
     -p 8000:8000 ^
-    --env-file ../auth-service/.env ^
     aime-auth-service
 
 if %errorlevel% equ 0 (

@@ -1,8 +1,12 @@
 // Browser-compatible logging utility
+import { Definitions } from '/app/common/definitions.js';
+
+const definitions = new Definitions();
+
 class Logger {
   constructor({
-    serviceName = 'default', 
-    logLevel = process.env.VUE_APP_LOG_LEVEL || 'INFO', 
+    serviceName = 'default',  // can be used by any service
+    logLevel = definitions.ui.logLevel || 'INFO', 
     logToConsole = true,
     sendRemoteLog = false,
   }) {

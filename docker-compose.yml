@@ -11,7 +11,6 @@ services:
       - server
     environment:
       - NODE_ENV=production
-      - VUE_APP_API_URL=http://server:3000
 
   server:
     build: 
@@ -25,8 +24,6 @@ services:
       - auth-service
     environment:
       - NODE_ENV=development
-      - BACK_PORT=3000
-      - SERVER_LOG_LEVEL=DEBUG
 
   auth-service:
     build: 

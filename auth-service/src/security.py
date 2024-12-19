@@ -30,15 +30,15 @@ def validate_password(password: str) -> bool:
     Validate password based on configured security policies
     """
     if len(password) < PASSWORD_MIN_LENGTH:
-        return False
+        return 1
     
     if PASSWORD_REQUIRE_SPECIAL_CHARS and not any(char in '!@#$%^&*()_+-=[]{}|;:,.<>?' for char in password):
-        return False
+        return 2
     
     if PASSWORD_REQUIRE_NUMBERS and not any(char.isdigit() for char in password):
-        return False
+        return 3
     
-    return True
+    return 0
 
 
 def verify_password(plain_password, hashed_password):

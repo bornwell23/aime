@@ -35,11 +35,6 @@ COPY --from=build /app/common /app/common
 # Copy nginx configuration
 COPY ui/nginx/default.conf /etc/nginx/conf.d/default.conf
 
-# Generate .env file from environment variables
-RUN echo "VUE_APP_API_URL=${VUE_APP_API_URL}" > /usr/share/nginx/html/.env && \
-    echo "VUE_APP_API_VERSION=${VUE_APP_API_VERSION}" >> /usr/share/nginx/html/.env && \
-    echo "VUE_APP_LOG_LEVEL=${VUE_APP_LOG_LEVEL}" >> /usr/share/nginx/html/.env
-
 # Expose port
 EXPOSE 80
 

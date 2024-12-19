@@ -20,17 +20,6 @@ RUN apt-get update \
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Generate .env file from environment variables
-RUN echo "AUTH_SERVICE_SECRET_KEY=${AUTH_SERVICE_SECRET_KEY}" > .env && \
-    echo "AUTH_SERVICE_ALGORITHM=${AUTH_SERVICE_ALGORITHM}" >> .env && \
-    echo "DATABASE_URL=${DATABASE_URL}" >> .env && \
-    echo "ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}" >> .env && \
-    echo "LOG_LEVEL=${LOG_LEVEL}" >> .env && \
-    echo "LOG_FORMAT=${LOG_FORMAT}" >> .env && \
-    echo "PASSWORD_MIN_LENGTH=${PASSWORD_MIN_LENGTH}" >> .env && \
-    echo "PASSWORD_REQUIRE_SPECIAL_CHARS=${PASSWORD_REQUIRE_SPECIAL_CHARS}" >> .env && \
-    echo "PASSWORD_REQUIRE_NUMBERS=${PASSWORD_REQUIRE_NUMBERS}" >> .env
-
 # Expose the port the app runs on
 EXPOSE 8000
 

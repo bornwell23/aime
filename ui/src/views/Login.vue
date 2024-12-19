@@ -1,79 +1,83 @@
 <template>
   <div class="login-container">
-    <form @submit.prevent="handleLogin" class="login-form">
-      <h2>Welcome to Aime</h2>
-      
-      <p class="login-subtitle">
-        {{ firstTimeUser 
-          ? 'It looks like you need to create an account first.' 
-          : 'Please log in to continue' 
-        }}
-      </p>
-      
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input 
-          type="text" 
-          id="username" 
-          v-model="username" 
-          required 
-          placeholder="Enter your username"
-        />
-      </div>
-      
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input 
-          :type="showPassword ? 'text' : 'password'" 
-          id="password" 
-          v-model="password" 
-          required 
-          placeholder="Enter your password"
-        />
-        <button 
-          type="button" 
-          @click="togglePasswordVisibility" 
-          class="password-toggle"
-        >
-          {{ showPassword ? 'Hide' : 'Show' }}
-        </button>
-      </div>
-      
-      <div v-if="error" class="error-message">
-        {{ error }}
-      </div>
-      
-      <button 
-        type="submit" 
-        class="login-button" 
-        :disabled="isLoading"
-      >
-        {{ isLoading ? 'Logging In...' : 'Log In' }}
-      </button>
-      
-      <div class="register-link">
-        <template v-if="firstTimeUser">
-          <p>No account yet? Create one now!</p>
+    <div class="login-wrapper">
+      <form @submit.prevent="handleLogin" class="login-form">
+        <h2>Welcome to Aime</h2>
+        
+        <p class="login-subtitle">
+          {{ firstTimeUser 
+            ? 'It looks like you need to create an account first.' 
+            : 'Please log in to continue' 
+          }}
+        </p>
+        
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input 
+            type="text" 
+            id="username" 
+            v-model="username" 
+            required 
+            placeholder="Enter your username"
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input 
+            :type="showPassword ? 'text' : 'password'" 
+            id="password" 
+            v-model="password" 
+            required 
+            placeholder="Enter your password"
+          />
           <button 
             type="button" 
-            class="register-button" 
-            @click="goToRegister"
+            @click="togglePasswordVisibility" 
+            class="password-toggle"
           >
-            Register
+            {{ showPassword ? 'Hide' : 'Show' }}
           </button>
-        </template>
-        <template v-else>
-          Don't have an account? 
-          <router-link to="/register">Register</router-link>
-        </template>
-      </div>
-    </form>
+        </div>
+        
+        <div v-if="error" class="error-message">
+          {{ error }}
+        </div>
+        
+        <button 
+          type="submit" 
+          class="login-button" 
+          :disabled="isLoading"
+        >
+          {{ isLoading ? 'Logging In...' : 'Log In' }}
+        </button>
+        
+        <div class="register-link">
+          <template v-if="firstTimeUser">
+            <p>No account yet? Create one now!</p>
+            <button 
+              type="button" 
+              class="register-button" 
+              @click="goToRegister"
+            >
+              Register
+            </button>
+          </template>
+          <template v-else>
+            Don't have an account? 
+            <router-link to="/register">Register</router-link>
+          </template>
+        </div>
+      </form>
+    </div>
   </div>
 </template>
 
 <script>
 import { login } from '@/services/apiConfig';
-import logger from '../../../common/logger';
+import { Logger } from '@common/logger.js';
+
+const logger = new Logger('LoginView');
 
 export default {
   name: 'LoginView',
@@ -97,6 +101,7 @@ export default {
       this.showPassword = !this.showPassword;
     },
     goToRegister() {
+      logger.info('Navigating to register page');
       this.$router.push('/register');
     },
     async handleLogin() {
@@ -106,7 +111,7 @@ export default {
 
       try {
         // Attempt login
-        await login(this.username, this.password);
+        const response = await login(this.username, this.password);
         
         // Log successful login
         logger.info(`User ${this.username} logged in successfully`);
@@ -147,13 +152,17 @@ export default {
   padding: 20px;
 }
 
+.login-wrapper {
+  width: 100%;
+  max-width: 400px;
+}
+
 .login-form {
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 30px;
   width: 100%;
-  max-width: 400px;
 }
 
 .login-subtitle {

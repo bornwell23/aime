@@ -1,11 +1,14 @@
 import express from 'express';
 import axios from 'axios';
 import { Logger } from '/app/common/logger.js';
+import { Definitions } from '/app/common/definitions.js';
+
+const definitions = new Definitions();
 
 const router = express.Router();
 const logger = new Logger({
     serviceName: 'auth-routes',
-    logLevel: process.env.VUE_APP_LOG_LEVEL || 'INFO',
+    logLevel: definitions.server.logLevel || 'INFO',
     logFileName: 'auth.log'
 });
 
@@ -13,7 +16,7 @@ const logger = new Logger({
 router.post('/token', async (req, res) => {
   try {
     // Forward the request to auth-service
-    const response = await axios.post('http://auth-service:8000/token', req.body, {
+    const response = await axios.post(`http://${definitions.auth.serviceName}:${definitions.auth.port}/token`, req.body, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
@@ -42,7 +45,7 @@ router.post('/token', async (req, res) => {
 router.post('/register', async (req, res) => {
   try {
     // Forward the request to auth-service
-    const response = await axios.post('http://auth-service:8000/register', req.body);
+    const response = await axios.post(`http://${definitions.auth.serviceName}:${definitions.auth.port}/register`, req.body);
 
     // Return the response from auth-service
     res.json(response.data);
@@ -67,7 +70,7 @@ router.post('/register', async (req, res) => {
 router.post('/logout', async (req, res) => {
   try {
     // Forward the request to auth-service
-    const response = await axios.post('http://auth-service:8000/logout', {}, {
+    const response = await axios.post(`http://${definitions.auth.serviceName}:${definitions.auth.port}/logout`, {}, {
       headers: {
         'Authorization': req.headers.authorization
       }

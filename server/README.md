@@ -151,14 +151,6 @@ mkdir src/api/v2
 - `npm run dev` - Start with nodemon for development
 - `npm run prod` - Start with PM2 for production
 
-### Environment Variables
-
-Create a `.env` file in the root directory:
-```env
-BACK_PORT=3000
-NODE_ENV=development
-```
-
 ## License
 
 [MIT License](LICENSE)
