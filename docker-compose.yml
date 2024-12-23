@@ -1,29 +1,43 @@
+networks:
+  aime_network:
+    driver: bridge
+
 services:
+
+
   ui:
     build: 
-      context: .
-      dockerfile: ui/Dockerfile
-      args:
-        - BUILD_DATE=${BUILD_DATE:-default}
+      context: ./ui
     ports:
-      - "8008:80"
+      - "8081:3000"
     depends_on:
       - server
     environment:
-      - NODE_ENV=production
+      - FLASK_ENV=production
+      - SERVICE_NAME=ui
+      - LOG_LEVEL=DEBUG
+      - SERVER_HOST=server
+      - SERVER_PORT=4000
+      - FLASK_SECRET_KEY=your-secret-key-here
+    networks:
+      - aime_network
+
 
   server:
     build: 
-      context: .
-      dockerfile: server/Dockerfile
-      args:
-        - BUILD_DATE=${BUILD_DATE:-default}
+      context: ./server
     ports:
-      - "3000:3000"
+      - "8001:80"
     depends_on:
       - auth-service
     environment:
-      - NODE_ENV=development
+      - SERVICE_NAME=server
+      - LOG_LEVEL=DEBUG
+      - PORT=4000
+      - AUTH_SERVICE_HOST=auth-service
+      - AUTH_SERVICE_PORT=8000
+    networks:
+      - aime_network
 
   auth-service:
     build: 
@@ -44,9 +58,13 @@ services:
       - PASSWORD_MIN_LENGTH=8
       - PASSWORD_REQUIRE_SPECIAL_CHARS=true
       - PASSWORD_REQUIRE_NUMBERS=true
+      - SERVICE_NAME=auth
+      - LOG_LEVEL=DEBUG
     ports:
       - "8000:8000"
     restart: always
+    networks:
+      - aime_network
   
   postgres:
     image: postgres:15-alpine
@@ -56,9 +74,13 @@ services:
       - POSTGRES_DB=aime_auth
       - POSTGRES_USER=aime_admin
       - POSTGRES_PASSWORD=aime_password
+      - SERVICE_NAME=postgres
+      - LOG_LEVEL=DEBUG
     ports:
       - "5432:5432"
     restart: always
+    networks:
+      - aime_network
 
 volumes:
   postgres_data:

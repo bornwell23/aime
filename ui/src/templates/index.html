@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Chat - Aime{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h3>Chat</h3>
+            </div>
+            <div class="card-body">
+                <div id="chat-messages" class="mb-3" style="height: 400px; overflow-y: auto;">
+                    <!-- Messages will be dynamically added here -->
+                </div>
+                <form id="chat-form" class="d-flex">
+                    <input type="text" id="message-input" class="form-control me-2" placeholder="Type your message...">
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatForm = document.getElementById('chat-form');
+    const messageInput = document.getElementById('message-input');
+    const chatMessages = document.getElementById('chat-messages');
+
+    chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const message = messageInput.value.trim();
+        if (!message) return;
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // Add message to chat
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'mb-2';
+                messageDiv.innerHTML = `
+                    <div class="d-flex justify-content-end">
+                        <div class="bg-primary text-white rounded p-2">
+                            ${message}
+                        </div>
+                    </div>
+                `;
+                chatMessages.appendChild(messageDiv);
+                
+                // Add response to chat
+                const responseDiv = document.createElement('div');
+                responseDiv.className = 'mb-2';
+                responseDiv.innerHTML = `
+                    <div class="d-flex justify-content-start">
+                        <div class="bg-light rounded p-2">
+                            ${data.response}
+                        </div>
+                    </div>
+                `;
+                chatMessages.appendChild(responseDiv);
+                
+                // Clear input and scroll to bottom
+                messageInput.value = '';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    });
+});
+</script>
+{% endblock %}

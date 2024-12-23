@@ -1,29 +1,37 @@
-# Use official Node.js LTS image
-FROM node:20-alpine
+FROM python:3.11-slim
 
-# Set working directory
 WORKDIR /app
 
-# Copy server project files
-COPY server /app/server
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    nginx \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy common folder 
-COPY common /app/common
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Add a build argument to invalidate cache
-ARG BUILD_DATE
-RUN echo "Build date: ${BUILD_DATE}"
+# Copy application code
+COPY src/ .
 
-# Install dependencies
-WORKDIR /app/server
-RUN npm ci
+# Make entrypoint script executable
+COPY src/entrypoint.sh /app/entrypoint.sh
 
-# Expose port
-EXPOSE 3000
+# Make the entrypoint script executable
+RUN chmod +x /app/entrypoint.sh
 
-# Set environment variables to force IPv4
-ENV NODE_OPTIONS="--dns-result-order=ipv4first"
-ENV NODE_ENV=development
+# Copy Nginx configuration
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Start the application with Node.js ES Module support
-CMD ["node", "--experimental-specifier-resolution=node", "src/index.js"]
+# Create static directory
+RUN mkdir -p /app/static
+
+# Set environment variables
+ENV PYTHONPATH=/app
+ENV FLASK_APP=app.py
+
+# Expose ports
+EXPOSE 80
+
+# Start Nginx and Gunicorn
+ENTRYPOINT ["/app/entrypoint.sh"]

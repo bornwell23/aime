@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Aime{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .dashboard-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Welcome, {{ user.username }}!</h1>
+            <p class="lead text-muted">Your personal dashboard</p>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-user-circle me-2"></i>Profile
+                    </h5>
+                    <p class="card-text">
+                        View and manage your account details
+                    </p>
+                    <a href="#" class="btn btn-primary">Manage Profile</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-tasks me-2"></i>Quick Actions
+                    </h5>
+                    <p class="card-text">
+                        Perform common tasks and navigate to key sections
+                    </p>
+                    <div class="btn-group" role="group">
+                        <a href="#" class="btn btn-outline-primary">Settings</a>
+                        <a href="#" class="btn btn-outline-secondary">Help</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-chart-line me-2"></i>Activity
+                    </h5>
+                    <p class="card-text">
+                        Recent activity and notifications
+                    </p>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">No recent activity</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Home dashboard loaded for user: {{ user.username }}');
+    });
+</script>
+{% endblock %}

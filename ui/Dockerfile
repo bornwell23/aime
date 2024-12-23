@@ -1,42 +1,21 @@
-# Build stage
-FROM node:20-alpine AS build
+FROM python:3.11-slim
 
-# Set working directory
 WORKDIR /app
 
-# Copy common folder first
-COPY common /app/common
-
-# Copy UI project files
-COPY ui /app/ui
-
-# Add a build argument to invalidate cache
-ARG BUILD_DATE
-RUN echo "Build date: ${BUILD_DATE}"
-
-# Set working directory to the ui to run npm correctly
-WORKDIR /app/ui
-
 # Install dependencies
-RUN npm ci
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Build the application
-RUN npm run build
+# Copy application code
+COPY src/ .
 
-# Production stage
-FROM nginx:alpine
-
-# Copy built assets from build stage
-COPY --from=build /app/ui/dist /usr/share/nginx/html
-
-# Copy common directory to production stage
-COPY --from=build /app/common /app/common
-
-# Copy nginx configuration
-COPY ui/nginx/default.conf /etc/nginx/conf.d/default.conf
+# Set environment variables
+ENV FLASK_APP=app.py
+ENV FLASK_ENV=production
+ENV PYTHONPATH=/app
 
 # Expose port
-EXPOSE 80
+EXPOSE 3000
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Run the application
+CMD ["python", "app.py"]

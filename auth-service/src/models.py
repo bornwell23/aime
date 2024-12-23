@@ -1,9 +1,14 @@
 #3rd party imports
-from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, func
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
+from datetime import datetime
+import pytz
 
 # project imports
 from src.database import Base
+
+Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"
@@ -25,5 +30,14 @@ class RegistrationAttempt(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     ip_address = Column(String, index=True)
-    last_registration_time = Column(DateTime(timezone=True), server_default=func.now())
+    last_registration_time = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     registration_count = Column(Integer, default=0)
+
+    def __init__(self, *args, **kwargs):
+        # Ensure last_registration_time is timezone-aware in UTC
+        if 'last_registration_time' in kwargs:
+            if kwargs['last_registration_time'].tzinfo is None:
+                kwargs['last_registration_time'] = kwargs['last_registration_time'].replace(tzinfo=pytz.UTC)
+            elif kwargs['last_registration_time'].tzinfo != pytz.UTC:
+                kwargs['last_registration_time'] = kwargs['last_registration_time'].astimezone(pytz.UTC)
+        super().__init__(*args, **kwargs)
