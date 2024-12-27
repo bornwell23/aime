@@ -5,13 +5,14 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 from typing import Optional
-from src.logging import logger
+
+from common.logging import logger
 
 # Load environment variables
 load_dotenv()
 
 # Get database URL from environment variables
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://aime_admin:aime_password@localhost/aime_auth")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://aime_admin:aime_password@localhost:5432/aime_auth")
 
 # Create SQLAlchemy engine
 engine = create_engine(DATABASE_URL)

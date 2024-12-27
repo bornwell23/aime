@@ -10,6 +10,7 @@ RUN echo "Build date: ${BUILD_DATE}"
 
 # Copy auth-service project files
 COPY auth-service/ /app
+COPY ../common /app/common
 
 # Install system dependencies
 RUN apt-get update \
@@ -18,7 +19,13 @@ RUN apt-get update \
 
 #Install Python dependencies
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir flake8 pylint
+
+# Run syntax checks
+RUN echo "Running syntax checks..." && python -m compileall .
+RUN echo "Running flake8..." && flake8 --ignore=W293,E501,F841 .
+RUN echo "Running pylint..." && pylint --disable=C,R,W --enable=E --ignore=tests ./*.py
 
 # Expose the port the app runs on
 EXPOSE 8000

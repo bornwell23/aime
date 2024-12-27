@@ -8,20 +8,27 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY server/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir flake8 pylint
+
+# Run syntax checks
+RUN echo "Running syntax checks..." && python -m compileall .
+RUN echo "Running flake8..." && flake8 --ignore=W293,E501,F841 .
+RUN echo "Running pylint..." && pylint --disable=C,R,W --enable=E --ignore=tests ./*.py
 
 # Copy application code
-COPY src/ .
+COPY server/src/ .
+COPY common /app/common
 
 # Make entrypoint script executable
-COPY src/entrypoint.sh /app/entrypoint.sh
+COPY server/src/entrypoint.sh /app/entrypoint.sh
 
 # Make the entrypoint script executable
 RUN chmod +x /app/entrypoint.sh
 
 # Copy Nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY server/nginx.conf /etc/nginx/nginx.conf
 
 # Create static directory
 RUN mkdir -p /app/static

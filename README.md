@@ -35,7 +35,7 @@ docker-compose -f docker-compose.yml up --build -d
 
 ### Accessing the Application
 - ui: `http://localhost:8008`
-- server API: `http://localhost:3000`
+- server API: `http://localhost:8001`
 
 ### Stopping the Application
 ```bash
@@ -80,3 +80,15 @@ npm start
 - To use a custom url for the ui instead of localhost:
   - c:\Windows\System32\Drivers\etc\hosts
   - `aime localhost`
+
+### Database Configuration
+- PostgreSQL is used as the primary database
+- Database name: `aime_app`
+- Default credentials:
+  - Username: `aime_admin`
+  - Password: `aime_password`
+
+#### Database Initialization
+- The database is automatically created during container startup
+- Connection details are configured in `docker-compose.yml`
+- Database connection is tested during server initialization

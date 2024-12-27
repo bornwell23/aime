@@ -8,7 +8,7 @@
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     .dashboard-card:hover {
-        transform: translateY(-10px);
+        transform: translateY(-5px);
         box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
 </style>
@@ -23,51 +23,131 @@
         </div>
     </div>
 
-    <div class="row mt-4">
-        <div class="col-md-4 mb-4">
-            <div class="card dashboard-card">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="fas fa-user-circle me-2"></i>Profile
-                    </h5>
-                    <p class="card-text">
-                        View and manage your account details
-                    </p>
-                    <a href="#" class="btn btn-primary">Manage Profile</a>
-                </div>
+    <div class="row mt-4" id="cardContainer">
+        <!-- Cards will be dynamically inserted here -->
+    </div>
+
+    <div class="control-panel">
+        <div class="container">
+            <div class="d-flex justify-content-center">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCardModal">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="btn btn-outline-secondary" id="searchButton">
+                    <i class="fas fa-search"></i>
+                </button>
+                <button class="btn btn-outline-secondary" id="generateButton">
+                    <i class="fas fa-magic"></i>
+                </button>
+                <button class="btn btn-outline-secondary" id="settingsButton">
+                    <i class="fas fa-cog"></i>
+                </button>
             </div>
         </div>
+    </div>
+</div>
 
-        <div class="col-md-4 mb-4">
-            <div class="card dashboard-card">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="fas fa-tasks me-2"></i>Quick Actions
-                    </h5>
-                    <p class="card-text">
-                        Perform common tasks and navigate to key sections
-                    </p>
-                    <div class="btn-group" role="group">
-                        <a href="#" class="btn btn-outline-primary">Settings</a>
-                        <a href="#" class="btn btn-outline-secondary">Help</a>
+<!-- Add Card Modal -->
+<div class="modal fade" id="addCardModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Card</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addCardForm">
+                    <div class="mb-3">
+                        <label for="cardTitle" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="cardTitle" required>
                     </div>
+                    <div class="mb-3">
+                        <label for="cardIcon" class="form-label">Icon</label>
+                        <select class="form-control" id="cardIcon" required>
+                            <option value="fas fa-star">Star</option>
+                            <option value="fas fa-chart-line">Chart</option>
+                            <option value="fas fa-tasks">Tasks</option>
+                            <option value="fas fa-user">User</option>
+                            <option value="fas fa-cog">Settings</option>
+                            <option value="fas fa-bell">Notifications</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cardContent" class="form-label">Content</label>
+                        <textarea class="form-control" id="cardContent" rows="3" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveCardButton">Add Card</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Modal -->
+<div class="modal fade" id="searchModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Search</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search cards...">
+                    <button class="btn btn-outline-secondary" type="button" id="searchExecuteButton">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div id="searchResults">
+                    <!-- Search results will be displayed here -->
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <div class="col-md-4 mb-4">
-            <div class="card dashboard-card">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="fas fa-chart-line me-2"></i>Activity
-                    </h5>
-                    <p class="card-text">
-                        Recent activity and notifications
-                    </p>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">No recent activity</li>
-                    </ul>
-                </div>
+<!-- Settings Modal -->
+<div class="modal fade" id="settingsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="settingsForm">
+                    <div class="mb-3">
+                        <label class="form-label">Theme</label>
+                        <select class="form-control" id="themeSelect">
+                            {% for theme in UI_SETTINGS.theme.options %}
+                            <option value="{{ theme }}">{{ theme|title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Card Layout</label>
+                        <select class="form-control" id="layoutSelect">
+                            {% for layout in UI_SETTINGS.layout.options %}
+                            <option value="{{ layout }}">{{ layout|title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">AI Model</label>
+                        <select class="form-control" id="modelSelect">
+                            {% for model in AI_MODEL_SETTINGS.available_models %}
+                            <option value="{{ model }}">{{ model }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveSettingsButton">Save Settings</button>
             </div>
         </div>
     </div>
@@ -77,7 +157,345 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Home dashboard loaded for user: {{ user.username }}');
+        logDebug('Home dashboard loaded');
+        loadCards();
+        loadSettings();
+        setupEventListeners();
     });
+
+    function setupEventListeners() {
+        const saveCardButton = document.getElementById('saveCardButton');
+        const searchButton = document.getElementById('searchButton');
+        const generateButton = document.getElementById('generateButton');
+        const settingsButton = document.getElementById('settingsButton');
+        const searchExecuteButton = document.getElementById('searchExecuteButton');
+        const saveSettingsButton = document.getElementById('saveSettingsButton');
+
+        saveCardButton.addEventListener('click', saveNewCard);
+        searchButton.addEventListener('click', () => {
+            const searchModal = new bootstrap.Modal(document.getElementById('searchModal'));
+            searchModal.show();
+        });
+        generateButton.addEventListener('click', generateCard);
+        settingsButton.addEventListener('click', () => {
+            const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
+            settingsModal.show();
+        });
+        searchExecuteButton.addEventListener('click', performSearch);
+        saveSettingsButton.addEventListener('click', saveSettings);
+    }
+
+    async function generateCard() {
+        try {
+            const response = await fetch('/api/cards/generate', {
+                method: 'POST'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const card = await response.json();
+            loadCards();  // Reload all cards to show the new one
+            
+            showSuccess('Generated new card successfully');
+        } catch (error) {
+            logError('Failed to generate card:', error);
+            showError('Failed to generate card. Please try again.');
+        }
+    }
+
+    async function performSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        const query = searchInput.value.trim();
+
+        if (!query) {
+            searchResults.innerHTML = '<div class="alert alert-info">Please enter a search term</div>';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/cards/search?q=${encodeURIComponent(query)}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const results = await response.json();
+            displaySearchResults(results);
+        } catch (error) {
+            logError('Failed to perform search:', error);
+            searchResults.innerHTML = '<div class="alert alert-danger">Failed to perform search. Please try again.</div>';
+        }
+    }
+
+    function displaySearchResults(results) {
+        const searchResults = document.getElementById('searchResults');
+        if (results.length === 0) {
+            searchResults.innerHTML = '<div class="alert alert-info">No results found</div>';
+            return;
+        }
+
+        searchResults.innerHTML = results.map(card => `
+            <div class="card mb-2">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="${card.icon} me-2"></i>${card.title}
+                    </h6>
+                    <p class="card-text small">${card.content}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function saveSettings() {
+        const theme = document.getElementById('themeSelect').value;
+        const layout = document.getElementById('layoutSelect').value;
+        const model = document.getElementById('modelSelect').value;
+
+        try {
+            // First save general settings
+            const settingsResponse = await fetch('/api/settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ theme, layout })
+            });
+
+            if (!settingsResponse.ok) {
+                throw new Error(`HTTP error! status: ${settingsResponse.status}`);
+            }
+
+            // Then save AI model settings
+            const modelResponse = await fetch('/api/settings/ai-model', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ model })
+            });
+
+            if (!modelResponse.ok) {
+                throw new Error(`HTTP error! status: ${modelResponse.status}`);
+            }
+
+            const settingsModal = bootstrap.Modal.getInstance(document.getElementById('settingsModal'));
+            settingsModal.hide();
+            
+            // Apply settings immediately
+            applySettings({ theme, layout, model });
+            showSuccess('Settings saved successfully');
+        } catch (error) {
+            logError('Failed to save settings:', error);
+            showError('Failed to save settings. Please try again.');
+        }
+    }
+
+    async function loadSettings() {
+        try {
+            const response = await fetch('/api/settings');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const settings = await response.json();
+            
+            // Update select values
+            document.getElementById('themeSelect').value = settings.theme || 'light';
+            document.getElementById('layoutSelect').value = settings.layout || 'grid';
+            document.getElementById('modelSelect').value = settings.model || AI_MODEL_SETTINGS.default_model;
+            
+            // Apply settings
+            applySettings(settings);
+        } catch (error) {
+            logError('Failed to load settings:', error);
+            showError('Failed to load settings. Using defaults.');
+        }
+    }
+
+    function applySettings(settings) {
+        // Apply theme
+        document.documentElement.setAttribute('data-theme', settings.theme || 'light');
+        
+        // Apply layout
+        const cardContainer = document.getElementById('cardContainer');
+        if (settings.layout === 'list') {
+            cardContainer.classList.remove('row');
+            cardContainer.classList.add('list-view');
+        } else {
+            cardContainer.classList.add('row');
+            cardContainer.classList.remove('list-view');
+        }
+        
+        // No visual changes needed for model setting
+        logDebug('Applied settings:', settings);
+    }
+
+    function showSuccess(message) {
+        const container = document.getElementById('cardContainer');
+        const successDiv = document.createElement('div');
+        successDiv.className = 'col-12';
+        successDiv.innerHTML = `
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+        container.insertBefore(successDiv, container.firstChild);
+        
+        setTimeout(() => {
+            successDiv.remove();
+        }, 3000);
+    }
+
+    async function loadCards() {
+        try {
+            const response = await fetch('/api/cards');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const cards = await response.json();
+            displayCards(cards);
+        } catch (error) {
+            logError('Failed to load cards:', error);
+            showError('Failed to load dashboard cards. Please try again later.');
+        }
+    }
+
+    function displayCards(cards) {
+        const container = document.getElementById('cardContainer');
+        container.innerHTML = ''; // Clear existing cards
+
+        // Add existing cards
+        cards.forEach(card => {
+            const cardElement = createCardElement(card);
+            container.appendChild(cardElement);
+        });
+
+        // Add the "Add Card" button
+        const addCardButton = document.createElement('div');
+        addCardButton.className = 'col-md-4 mb-4';
+        addCardButton.innerHTML = `
+            <div class="add-card-button" data-bs-toggle="modal" data-bs-target="#addCardModal">
+                <div class="text-center">
+                    <i class="fas fa-plus fa-2x mb-2"></i>
+                    <div>Add New Card</div>
+                </div>
+            </div>
+        `;
+        container.appendChild(addCardButton);
+    }
+
+    function createCardElement(card) {
+        const div = document.createElement('div');
+        div.className = 'col-md-4 mb-4';
+        div.innerHTML = `
+            <div class="card dashboard-card" data-card-id="${card.id}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h5 class="card-title">
+                            <i class="${card.icon} me-2"></i>${card.title}
+                        </h5>
+                        <button class="btn btn-sm btn-outline-danger remove-card-btn" 
+                                onclick="removeCard('${card.id}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <p class="card-text">${card.content}</p>
+                    ${card.actions ? createCardActions(card.actions) : ''}
+                </div>
+            </div>
+        `;
+        return div;
+    }
+
+    function createCardActions(actions) {
+        if (!actions || actions.length === 0) return '';
+        
+        return `
+            <div class="btn-group" role="group">
+                ${actions.map(action => `
+                    <button class="btn btn-outline-primary" onclick="${action.handler}">
+                        ${action.label}
+                    </button>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    async function saveNewCard() {
+        const title = document.getElementById('cardTitle').value;
+        const icon = document.getElementById('cardIcon').value;
+        const content = document.getElementById('cardContent').value;
+
+        if (!title || !icon || !content) {
+            showError('Please fill in all fields');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/cards', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ title, icon, content })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Close modal and reload cards
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addCardModal'));
+            modal.hide();
+            loadCards();
+            
+            // Clear form
+            document.getElementById('addCardForm').reset();
+        } catch (error) {
+            logError('Failed to save card:', error);
+            showError('Failed to save card. Please try again.');
+        }
+    }
+
+    async function removeCard(cardId) {
+        if (!confirm('Are you sure you want to remove this card?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/cards/${cardId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            loadCards();
+        } catch (error) {
+            logError('Failed to remove card:', error);
+            showError('Failed to remove card. Please try again.');
+        }
+    }
+
+    function showError(message) {
+        const container = document.getElementById('cardContainer');
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'col-12';
+        errorDiv.innerHTML = `
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+        container.insertBefore(errorDiv, container.firstChild);
+        
+        setTimeout(() => {
+            errorDiv.remove();
+        }, 5000);
+    }
 </script>
 {% endblock %}

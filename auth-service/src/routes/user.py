@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from common.logging import logger
+
 from src import schemas, crud, security
 from src.database import get_db
-from src.logging import logger
+
 
 user_router = APIRouter()
 

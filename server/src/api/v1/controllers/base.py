@@ -1,5 +1,6 @@
 from flask import jsonify
-from logger import logger
+from common.logging import logger
+
 
 class BaseController:
     def get_all(self):

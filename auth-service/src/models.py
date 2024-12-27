@@ -1,14 +1,22 @@
-#3rd party imports
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, func
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Table, func
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from datetime import datetime
 import pytz
 
-# project imports
 from src.database import Base
 
-Base = declarative_base()
+# Association table for user roles
+user_roles = Table('user_roles', Base.metadata,
+    Column('user_id', Integer, ForeignKey('users.id')),
+    Column('role_id', Integer, ForeignKey('roles.id'))
+)
+
+# Association table for role permissions
+role_permissions = Table('role_permissions', Base.metadata,
+    Column('role_id', Integer, ForeignKey('roles.id')),
+    Column('permission_id', Integer, ForeignKey('permissions.id'))
+)
 
 class User(Base):
     __tablename__ = "users"
@@ -21,9 +29,43 @@ class User(Base):
     is_superuser = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationship to roles
+    roles = relationship("Role", secondary=user_roles, back_populates="users")
 
     def __repr__(self):
         return f"<User(username='{self.username}', email='{self.email}')>"
+
+class Role(Base):
+    __tablename__ = "roles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, nullable=False)
+    description = Column(String)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    users = relationship("User", secondary=user_roles, back_populates="roles")
+    permissions = relationship("Permission", secondary=role_permissions, back_populates="roles")
+
+    def __repr__(self):
+        return f"<Role(name='{self.name}')>"
+
+class Permission(Base):
+    __tablename__ = "permissions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, nullable=False)
+    description = Column(String)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationship to roles
+    roles = relationship("Role", secondary=role_permissions, back_populates="permissions")
+
+    def __repr__(self):
+        return f"<Permission(name='{self.name}')>"
 
 class RegistrationAttempt(Base):
     __tablename__ = "registration_attempts"

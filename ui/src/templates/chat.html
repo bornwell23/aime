@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block title %}Chat - Aime{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="chat-container" id="chatMessages">
+        <!-- Messages will be dynamically inserted here -->
+    </div>
+
+    <div id="mediaPreview" class="text-center">
+        <div id="previewContent"></div>
+        <button class="btn btn-sm btn-outline-danger mt-2" onclick="clearMediaPreview()">
+            <i class="fas fa-times"></i> Clear
+        </button>
+    </div>
+
+    <div class="control-panel">
+        <div class="container">
+            <div class="input-group">
+                <input type="text" class="form-control" id="messageInput" 
+                       placeholder="Type your message..." aria-label="Message">
+                <button class="btn btn-primary" id="sendButton">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                <button class="btn btn-outline-secondary" id="micButton">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button class="btn btn-outline-secondary" id="fileButton">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                <button class="btn btn-outline-secondary" id="cameraButton">
+                    <i class="fas fa-camera"></i>
+                </button>
+                <input type="file" id="fileInput" style="display: none" 
+                       accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt">
+                <input type="file" id="cameraInput" style="display: none" 
+                       accept="image/*,video/*" capture="environment">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let isRecording = false;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let selectedFile = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        logDebug('Chat page loaded');
+        setupEventListeners();
+        loadChatHistory();
+    });
+
+    function setupEventListeners() {
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const micButton = document.getElementById('micButton');
+        const fileButton = document.getElementById('fileButton');
+        const cameraButton = document.getElementById('cameraButton');
+        const fileInput = document.getElementById('fileInput');
+        const cameraInput = document.getElementById('cameraInput');
+
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        sendButton.addEventListener('click', sendMessage);
+        micButton.addEventListener('click', toggleRecording);
+        
+        fileButton.addEventListener('click', () => fileInput.click());
+        cameraButton.addEventListener('click', () => cameraInput.click());
+        
+        fileInput.addEventListener('change', handleFileSelect);
+        cameraInput.addEventListener('change', handleFileSelect);
+    }
+
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        selectedFile = file;
+        const preview = document.getElementById('mediaPreview');
+        const previewContent = document.getElementById('previewContent');
+        
+        if (file.type.startsWith('image/')) {
+            previewContent.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="Preview">`;
+            preview.style.display = 'block';
+        } else if (file.type.startsWith('video/')) {
+            previewContent.innerHTML = `<video src="${URL.createObjectURL(file)}" controls></video>`;
+            preview.style.display = 'block';
+        } else {
+            previewContent.innerHTML = `<div class="text-center">
+                <i class="fas fa-file fa-2x mb-2"></i>
+                <div>${file.name}</div>
+            </div>`;
+            preview.style.display = 'block';
+        }
+    }
+
+    function clearMediaPreview() {
+        selectedFile = null;
+        const preview = document.getElementById('mediaPreview');
+        const previewContent = document.getElementById('previewContent');
+        preview.style.display = 'none';
+        previewContent.innerHTML = '';
+        document.getElementById('fileInput').value = '';
+        document.getElementById('cameraInput').value = '';
+    }
+
+    async function sendMessage() {
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value.trim();
+        
+        if (!message && !selectedFile) return;
+        
+        messageInput.value = '';
+        
+        try {
+            if (selectedFile) {
+                await sendFileMessage(selectedFile, message);
+                clearMediaPreview();
+            } else {
+                await sendTextMessage(message);
+            }
+        } catch (error) {
+            logError('Failed to send message:', error);
+            showError('Failed to send message. Please try again.');
+        }
+    }
+
+    async function sendFileMessage(file, text = '') {
+        const formData = new FormData();
+        formData.append('file', file);
+        if (text) formData.append('message', text);
+
+        const response = await fetch('/api/chat/file', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        addMessage(data);
+    }
+
+    async function sendTextMessage(message) {
+        addMessage({ role: 'user', content: message, timestamp: new Date().toISOString() });
+
+        const response = await fetch('/api/chat/message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        addMessage(data);
+    }
+
+    async function loadChatHistory() {
+        try {
+            const response = await fetch('/api/chat/history');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const messages = await response.json();
+            displayMessages(messages);
+        } catch (error) {
+            logError('Failed to load chat history:', error);
+            showError('Failed to load chat history. Please try again later.');
+        }
+    }
+
+    async function toggleRecording() {
+        const micButton = document.getElementById('micButton');
+        
+        if (!isRecording) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.addEventListener('dataavailable', event => {
+                    audioChunks.push(event.data);
+                });
+
+                mediaRecorder.addEventListener('stop', async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    await sendAudioMessage(audioBlob);
+                });
+
+                mediaRecorder.start();
+                isRecording = true;
+                micButton.classList.add('btn-danger');
+                logDebug('Started recording audio');
+            } catch (error) {
+                logError('Failed to start recording:', error);
+                showError('Failed to access microphone. Please check your permissions.');
+            }
+        } else {
+            mediaRecorder.stop();
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            isRecording = false;
+            micButton.classList.remove('btn-danger');
+            logDebug('Stopped recording audio');
+        }
+    }
+
+    async function sendAudioMessage(audioBlob) {
+        try {
+            const formData = new FormData();
+            formData.append('audio', audioBlob);
+
+            const response = await fetch('/api/chat/audio', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            addMessage(data);
+        } catch (error) {
+            logError('Failed to send audio message:', error);
+            showError('Failed to process audio message. Please try again.');
+        }
+    }
+
+    function addMessage(message) {
+        const container = document.getElementById('chatMessages');
+        const messageDiv = createMessageElement(message);
+        container.appendChild(messageDiv);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function displayMessages(messages) {
+        const container = document.getElementById('chatMessages');
+        container.innerHTML = '';
+        messages.forEach(message => {
+            const messageDiv = createMessageElement(message);
+            container.appendChild(messageDiv);
+        });
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function createMessageElement(message) {
+        const div = document.createElement('div');
+        div.className = `message ${message.role === 'user' ? 'message-user' : 'message-bot'}`;
+        div.innerHTML = `
+            <div class="message-content">${message.content}</div>
+            <small class="text-muted">${new Date(message.timestamp).toLocaleTimeString()}</small>
+        `;
+        return div;
+    }
+
+    function showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger m-3';
+        errorDiv.textContent = message;
+        
+        const container = document.getElementById('chatMessages');
+        container.appendChild(errorDiv);
+        container.scrollTop = container.scrollHeight;
+        
+        setTimeout(() => {
+            errorDiv.remove();
+        }, 5000);
+    }
+</script>
+{% endblock %}

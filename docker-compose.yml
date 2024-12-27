@@ -3,39 +3,42 @@ networks:
     driver: bridge
 
 services:
-
-
   ui:
     build: 
-      context: ./ui
+      context: .
+      dockerfile: ui/Dockerfile
     ports:
       - "8081:3000"
     depends_on:
       - server
     environment:
-      - FLASK_ENV=production
+      - FLASK_ENV=development
       - SERVICE_NAME=ui
       - LOG_LEVEL=DEBUG
       - SERVER_HOST=server
       - SERVER_PORT=4000
-      - FLASK_SECRET_KEY=your-secret-key-here
+      - FLASK_SECRET_KEY=aime-secret-key
     networks:
       - aime_network
 
 
   server:
     build: 
-      context: ./server
+      context: .
+      dockerfile: server/Dockerfile
     ports:
       - "8001:80"
     depends_on:
       - auth-service
+      - postgres-app
     environment:
+      - FLASK_ENV=development
       - SERVICE_NAME=server
       - LOG_LEVEL=DEBUG
       - PORT=4000
       - AUTH_SERVICE_HOST=auth-service
       - AUTH_SERVICE_PORT=8000
+      - DATABASE_URL=postgresql://aime_admin:aime_password@postgres-app/aime_app
     networks:
       - aime_network
 
@@ -46,9 +49,9 @@ services:
       args:
         - BUILD_DATE=${BUILD_DATE:-default}
     depends_on:
-      - postgres
+      - postgres-auth
     environment:
-      - DATABASE_URL=postgresql://aime_admin:aime_password@postgres/aime_auth
+      - DATABASE_URL=postgresql://aime_admin:aime_password@postgres-auth/aime_auth
       - AUTH_SERVICE_SECRET_KEY=2f763e3b0f490c021c61d0c23d42e4404309e12564c1526e01378d26c05464b7
       - AUTH_SERVICE_ALGORITHM=HS256
       - ACCESS_TOKEN_EXPIRE_MINUTES=1440
@@ -66,21 +69,38 @@ services:
     networks:
       - aime_network
   
-  postgres:
+  postgres-app:
     image: postgres:15-alpine
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=aime_auth
       - POSTGRES_USER=aime_admin
       - POSTGRES_PASSWORD=aime_password
-      - SERVICE_NAME=postgres
-      - LOG_LEVEL=DEBUG
+      - POSTGRES_DB=aime_app
+    volumes:
+      - postgres_app_data:/var/lib/postgresql/data
+    networks:
+      - aime_network
+    ports:
+      - "5433:5432"
+    restart: always
+
+  postgres-auth:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=aime_admin
+      - POSTGRES_PASSWORD=aime_password
+      - POSTGRES_DB=aime_auth
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+    networks:
+      - aime_network
     ports:
       - "5432:5432"
     restart: always
-    networks:
-      - aime_network
+
 
 volumes:
-  postgres_data:
+  postgres_app_data:
+    driver: local
+
+  postgres_auth_data:
+    driver: local

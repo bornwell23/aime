@@ -1,5 +1,6 @@
 import os
-from logger import logger
+from flask import g
+from common.logging import logger
 
 class APIConfig:
     def __init__(self):
@@ -25,3 +26,27 @@ class APIConfig:
             return f"{self.base_url}/api/{self.api_version}/{endpoint}"
         else:
             return f"{self.base_url}/{endpoint}"
+
+    def get_auth_headers(self):
+        """
+        Get headers for server API requests including roles and permissions
+        """
+        try:
+            # Get current user from flask global context
+            user = getattr(g, 'user', None)
+            headers = {}
+            
+            if user:
+                # Add roles and permissions headers
+                if hasattr(user, 'roles'):
+                    headers['X-User-Roles'] = ','.join(user.roles)
+                if hasattr(user, 'permissions'):
+                    headers['X-User-Permissions'] = ','.join(user.permissions)
+                
+                logger.debug(f'Added auth headers - Roles: {user.roles}, Permissions: {user.permissions}')
+            
+            return headers
+            
+        except Exception as e:
+            logger.error(f'Error creating auth headers: {str(e)}')
+            return {}

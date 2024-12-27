@@ -1,6 +1,8 @@
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
-from src.logging import logger
+
+from common.logging import logger
+
 from src.database import check_database_health
 
 health_router = APIRouter()

@@ -1,12 +1,13 @@
 import os
 import requests
 import time
-from logger import logger
+from common.logging import logger
+
 
 def check_service_health(service_name, service_url, max_retries=3, delay=5):
     """
     Perform health check on a service with retry mechanism
-    
+
     :param service_name: Name of the service for logging
     :param service_url: Full URL of the health check endpoint
     :param max_retries: Maximum number of retry attempts
@@ -31,12 +32,13 @@ def check_service_health(service_name, service_url, max_retries=3, delay=5):
             logger.error(f'{service_name} health check error (attempt {attempt + 1}): {e}')
         except ValueError:  # JSON decoding error
             logger.error(f'{service_name} health check returned invalid JSON')
-        
+
         # Wait before retrying
         time.sleep(delay)
-    
+
     logger.error(f'{service_name} health check failed after maximum retries')
     return False
+
 
 def get_auth_service_health_url():
     """

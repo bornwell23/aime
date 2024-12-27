@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}History - Aime{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">History</h1>
+        </div>
+    </div>
+
+    <div class="card-list" id="historyList">
+        <!-- History items will be dynamically inserted here -->
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        logDebug('History page loaded');
+        loadHistory();
+    });
+
+    async function loadHistory() {
+        try {
+            const response = await fetch('/api/history');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            displayHistory(data);
+        } catch (error) {
+            logError('Failed to load history:', error);
+            showError('Failed to load history. Please try again later.');
+        }
+    }
+
+    function displayHistory(items) {
+        const container = document.getElementById('historyList');
+        container.innerHTML = ''; // Clear existing items
+
+        items.forEach(item => {
+            const card = createHistoryCard(item);
+            container.appendChild(card);
+        });
+
+        if (items.length === 0) {
+            container.innerHTML = '<div class="alert alert-info">No history items yet.</div>';
+        }
+    }
+
+    function createHistoryCard(item) {
+        const card = document.createElement('div');
+        card.className = 'card mb-3';
+        card.innerHTML = `
+            <div class="card-header" role="button" data-bs-toggle="collapse" 
+                 data-bs-target="#history-${item.id}" aria-expanded="false">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">${item.title}</h5>
+                    <small class="text-muted">${new Date(item.timestamp).toLocaleString()}</small>
+                </div>
+            </div>
+            <div class="collapse" id="history-${item.id}">
+                <div class="card-body">
+                    ${item.content_type === 'markdown' 
+                        ? marked.parse(item.content)
+                        : formatChat(item.content)}
+                </div>
+            </div>
+        `;
+        return card;
+    }
+
+    function formatChat(messages) {
+        return messages.map(msg => `
+            <div class="message ${msg.role === 'user' ? 'message-user' : 'message-bot'}">
+                <div class="message-content">${msg.content}</div>
+                <small class="text-muted">${new Date(msg.timestamp).toLocaleTimeString()}</small>
+            </div>
+        `).join('');
+    }
+
+    function showError(message) {
+        const container = document.getElementById('historyList');
+        container.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+                ${message}
+            </div>
+        `;
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+{% endblock %}
