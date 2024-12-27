@@ -1,14 +1,16 @@
 # Aime Microservice Project
 
-This project consists of two main components:
-- `server`: Node.js + Express backend service
-- `ui`: Vue.js web interface
+This project consists of three main components:
+- `server`: Main backend service that handles business logic and database operations
+- `auth-service`: Authentication service for user management and token handling
+- `ui`: Flask web interface
 
 ## Project Structure
 ```
 Aime/
-├── server/         # Backend Node.js + Express service
-└── ui/       # ui Vue.js application
+├── server/         # Main backend service
+├── auth-service/   # Authentication service
+└── ui/            # Flask web application
 ```
 
 ## Docker Deployment
@@ -34,69 +36,70 @@ docker-compose -f docker-compose.yml up --build -d
 ```
 
 ### Accessing the Application
-- ui: `http://localhost:8008`
-- server API: `http://localhost:8001`
+- UI: `http://localhost:8081`
+- Server API: `http://localhost:8001` (for internal use only)
+- Auth Service: `http://localhost:8000` (for internal use only)
 
 ### Stopping the Application
 ```bash
 docker-compose down
 ```
 
-## Setup Instructions
+## Architecture
 
-### server
-1. Navigate to the server directory: `cd server`
-2. Install dependencies: `npm install`
-3. Start the server: `npm start`
-4. For development with hot-reload: `npm run dev`
+### Authentication Flow
+1. The UI communicates only with the main server
+2. The server proxies authentication requests to the auth service
+3. The auth service handles token generation and validation
+4. Session management is handled at both UI and auth service levels
 
-### ui
-1. Navigate to the ui directory: `cd ui`
-2. Install dependencies: `npm install`
-3. Start the development server: `npm run serve`
-4. For production build: `npm run build`
-
-## Local Development
-
-### Ui
-```bash
-cd ui
-npm install
-npm run serve
-```
-
-### Server
-```bash
-cd server
-npm install
-npm start
-```
-
-## Deployment Notes
-- The application uses multi-stage Docker builds
-- ui is served via Nginx
-- server is a Node.js application
-- Environment variables can be customized in the environment or a `.env` file
-- To use a custom url for the ui instead of localhost:
-  - c:\Windows\System32\Drivers\etc\hosts
-  - `aime localhost`
-
-### Database Configuration
-- PostgreSQL is used as the primary database
-- Database name: `aime_app`
+### Database Architecture
+- Main application database (`aime_app`): Used by the server for application data
+- Authentication database (`aime_auth`): Used by the auth service for user management
 - Default credentials:
   - Username: `aime_admin`
   - Password: `aime_password`
 
-#### Database Initialization
-- The database is automatically created during container startup
-- Connection details are configured in `docker-compose.yml`
-- Database connection is tested during server initialization
+## Setup Instructions
+
+### Server
+1. Navigate to the server directory: `cd server`
+2. Install dependencies: `pip install -r requirements.txt`
+3. Start the server: `python src/app.py`
+
+### Auth Service
+1. Navigate to the auth service directory: `cd auth-service`
+2. Install dependencies: `pip install -r requirements.txt`
+3. Start the service: `python src/app.py`
+
+### UI
+1. Navigate to the UI directory: `cd ui`
+2. Install dependencies: `pip install -r requirements.txt`
+3. Start the development server: `python src/app.py`
+
+## Local Development
+
+
+
+## Deployment Notes
+- The application uses multi-stage Docker builds
+- UI is served via Flask development server (production should use gunicorn)
+- All services use Python with Flask
+- Environment variables can be customized in the environment or `.env` files
+- To use a custom URL instead of localhost:
+  - Edit: `c:\Windows\System32\Drivers\etc\hosts`
+  - Add: `aime localhost`
+
+### Security Notes
+- All authentication tokens are handled securely through the auth service
+- The UI never directly communicates with the auth service
+- User sessions are managed both at the UI level and through token validation
+- All user input is validated and sanitized
+- Secure headers and CORS policies are implemented
 
 ## Testing Docker Builds
 
 ### `test_docker_builds.py`
-
 This script is used to validate and fix Docker image builds for services in the project.
 
 #### Usage
