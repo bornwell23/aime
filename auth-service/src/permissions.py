@@ -14,6 +14,7 @@ from common.logging import logger
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+
 def get_current_user_permissions(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> List[str]:
     """
     Get the current user's permissions from their JWT token
@@ -23,23 +24,24 @@ def get_current_user_permissions(token: str = Depends(oauth2_scheme), db: Sessio
         username: str = payload.get("sub")
         if username is None:
             raise HTTPException(status_code=401, detail="Could not validate credentials")
-        
+
         user = get_user_by_username(db, username)
         if user is None:
             raise HTTPException(status_code=401, detail="User not found")
-        
+
         # Get all unique permissions from user's roles
         permissions = set()
         for role in user.roles:
             for permission in role.permissions:
                 permissions.add(permission.name)
-        
+
         return list(permissions)
     except jwt.JWTError:
         raise HTTPException(status_code=401, detail="Could not validate credentials")
     except Exception as e:
         logger.error(f"Error getting user permissions: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
 
 def has_permission(required_permission: str):
     """
@@ -57,6 +59,7 @@ def has_permission(required_permission: str):
         return wrapper
     return decorator
 
+
 def has_role(required_role: str):
     """
     Decorator to check if user has required role
@@ -69,18 +72,18 @@ def has_role(required_role: str):
                 username: str = payload.get("sub")
                 if username is None:
                     raise HTTPException(status_code=401, detail="Could not validate credentials")
-                
+
                 user = get_user_by_username(db, username)
                 if user is None:
                     raise HTTPException(status_code=401, detail="User not found")
-                
+
                 user_roles = [role.name for role in user.roles]
                 if required_role not in user_roles:
                     raise HTTPException(
                         status_code=403,
                         detail=f"Role '{required_role}' required"
                     )
-                
+
                 return await func(*args, **kwargs)
             except jwt.JWTError:
                 raise HTTPException(status_code=401, detail="Could not validate credentials")
@@ -90,11 +93,12 @@ def has_role(required_role: str):
         return wrapper
     return decorator
 
+
 def init_roles_and_permissions(db: Session):
     """
     Initialize default roles and permissions in the database
     """
-    try:       
+    try:
         # Create permissions if they don't exist
         permissions = {}
         for perm_name, perm_desc in PERMISSIONS.items():
@@ -104,7 +108,7 @@ def init_roles_and_permissions(db: Session):
                 db.add(perm)
                 logger.info(f"Created permission: {perm_name}")
             permissions[perm_name] = perm
-        
+
         # Create roles if they don't exist
         for role_name, role_data in ROLES.items():
             role = db.query(Role).filter(Role.name == role_name).first()
@@ -118,10 +122,10 @@ def init_roles_and_permissions(db: Session):
                     role.permissions.append(permissions[perm_name])
                 db.add(role)
                 logger.info(f"Created role: {role_name}")
-        
+
         db.commit()
         logger.info("Successfully initialized roles and permissions")
-        
+
     except Exception as e:
         db.rollback()
         logger.error(f"Error initializing roles and permissions: {str(e)}")

@@ -5,11 +5,12 @@ from common.logging import logger
 from services.api_config import APIConfig
 import requests
 
+
 class User(UserMixin):
     def __init__(self, user_id=None, username=None, email=None, roles=None, permissions=None):
         """
         Initialize a User object with basic attributes
-        
+
         Args:
             user_id (str): Unique identifier for the user
             username (str): User's username
@@ -53,21 +54,22 @@ class User(UserMixin):
             'permissions': self.permissions
         }
 
+
 class AccountManager:
     def __init__(self, session_dir=None):
         """
         Initialize AccountManager with session storage
         """
         self.session_dir = session_dir or os.path.join(
-            os.path.dirname(__file__), 
-            '..', 
+            os.path.dirname(__file__),
+            '..',
             'sessions'
         )
         self.api_config = APIConfig()
-        
+
         # Ensure session directory exists
         os.makedirs(self.session_dir, exist_ok=True)
-        
+
         logger.info(f"[AccountManager] Initialized with session directory: {self.session_dir}")
 
     def store_user(self, user):
@@ -169,14 +171,13 @@ class AccountManager:
             return False, str(e)
 
     def logout(self, user_id):
-        """Remove user session"""
+        """Remove user session and invalidate token through server"""
         try:
-            # TODO: invalidate token in auth service
-            auth_url = self.api_config.get_auth_url('/auth/logout')
-            response = requests.post(auth_url, json={
-                'token': token
-            })
-            
+            # Invalidate token through server
+            server_url = self.api_config.get_api_url('/auth/logout')
+            response = requests.post(server_url)
+
+            # Remove local session file
             session_file = os.path.join(self.session_dir, f"{user_id}_session.json")
             if os.path.exists(session_file):
                 os.remove(session_file)

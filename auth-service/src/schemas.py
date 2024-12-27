@@ -3,12 +3,15 @@ import re
 from datetime import datetime
 from typing import Optional, List
 
+
 class PermissionBase(BaseModel):
     name: str
     description: Optional[str] = None
 
+
 class PermissionCreate(PermissionBase):
     pass
+
 
 class Permission(PermissionBase):
     id: int
@@ -18,12 +21,15 @@ class Permission(PermissionBase):
     class Config:
         orm_mode = True
 
+
 class RoleBase(BaseModel):
     name: str
     description: Optional[str] = None
 
+
 class RoleCreate(RoleBase):
     permissions: List[str]  # List of permission names
+
 
 class Role(RoleBase):
     id: int
@@ -34,9 +40,11 @@ class Role(RoleBase):
     class Config:
         orm_mode = True
 
+
 class UserBase(BaseModel):
     username: constr(min_length=3, max_length=50)
     email: EmailStr
+
 
 class UserCreate(UserBase):  # Used for registration
     password: constr(min_length=8, max_length=100)
@@ -53,6 +61,7 @@ class UserCreate(UserBase):  # Used for registration
             raise ValueError('Password does not meet complexity requirements')
         return v
 
+
 class User(UserBase):  # Used for responses
     id: int
     is_active: bool
@@ -64,6 +73,7 @@ class User(UserBase):  # Used for responses
     class Config:
         orm_mode = True
 
+
 class UserUpdate(BaseModel):  # Used for updating user
     username: Optional[str] = None
     email: Optional[EmailStr] = None
@@ -72,6 +82,7 @@ class UserUpdate(BaseModel):  # Used for updating user
 
     class Config:
         orm_mode = True
+
 
 class UserResponse(BaseModel):  # Used for returning user details
     id: int
@@ -83,18 +94,22 @@ class UserResponse(BaseModel):  # Used for returning user details
     class Config:
         orm_mode = True
 
+
 class Token(BaseModel):  # Used for returning access token
     access_token: str
     token_type: str
     id: Optional[int] = None
 
+
 class TokenRefresh(BaseModel):  # Used for refreshing access token
     token: str
+
 
 class TokenData(BaseModel):  # Used for decoding access token
     username: Optional[str] = None
     roles: Optional[List[str]] = None
     permissions: Optional[List[str]] = None
+
 
 class RegistrationRateLimit(BaseModel):  # Used for rate limiting
     ip_address: str

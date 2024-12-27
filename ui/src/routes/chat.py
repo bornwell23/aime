@@ -6,6 +6,7 @@ from common.logging import logger
 from services.api_config import APIConfig
 from common.definitions import FILE_UPLOAD_SETTINGS
 
+
 def register_chat_routes(app):
     @app.route('/api/chat')
     @login_required
@@ -19,12 +20,12 @@ def register_chat_routes(app):
         try:
             api_config = APIConfig()
             chat_url = api_config.get_api_url('/chat')
-            
+
             logger.debug(f'Fetching chat from server URL: {chat_url}')
-            
+
             # Make request to server's chat endpoint
             response = requests.get(chat_url, timeout=10)
-            
+
             if response.status_code == 200:
                 chat_data = response.json()
                 logger.info(f'Successfully retrieved {len(chat_data)} chat items')
@@ -35,7 +36,7 @@ def register_chat_routes(app):
                     'error': 'Failed to retrieve chat',
                     'status_code': response.status_code
                 }), 500
-        
+
         except requests.RequestException as e:
             logger.error(f'Error fetching chat from server: {str(e)}', exc_info=True)
             return jsonify({
@@ -59,12 +60,12 @@ def register_chat_routes(app):
             api_config = APIConfig()
             chat_url = api_config.get_api_url('/chat/history')
             headers = api_config.get_auth_headers()
-            
+
             logger.debug(f'Fetching chat history from server URL: {chat_url}')
-            
+
             # Make request to server's chat endpoint
             response = requests.get(chat_url, headers=headers, timeout=10)
-            
+
             if response.status_code == 200:
                 chat_data = response.json()
                 logger.info(f'Successfully retrieved {len(chat_data)} chat messages')
@@ -75,7 +76,7 @@ def register_chat_routes(app):
                     'error': 'Failed to retrieve chat history',
                     'status_code': response.status_code
                 }), response.status_code
-        
+
         except requests.RequestException as e:
             logger.error(f'Error fetching chat history from server: {str(e)}', exc_info=True)
             return jsonify({
@@ -99,25 +100,25 @@ def register_chat_routes(app):
             data = request.get_json()
             if 'message' not in data:
                 return jsonify({'error': 'Missing required field: message'}), 400
-                
+
             message = data['message'].strip()
             if not message:
                 return jsonify({'error': 'Message cannot be empty'}), 400
-            
+
             api_config = APIConfig()
             message_url = api_config.get_api_url('/chat/message')
             headers = api_config.get_auth_headers()
-            
+
             logger.debug(f'Sending message to server URL: {message_url}')
-            
+
             # Send message to server
             response = requests.post(
-                message_url, 
+                message_url,
                 headers=headers,
                 json={'message': message},
                 timeout=10
             )
-            
+
             if response.status_code == 200:
                 response_data = response.json()
                 logger.info('Successfully sent message and received response')
@@ -125,7 +126,7 @@ def register_chat_routes(app):
             else:
                 logger.error(f'Failed to send message. Server returned status {response.status_code}')
                 return jsonify(response.json()), response.status_code
-                
+
         except requests.RequestException as e:
             logger.error(f'Error sending message to server: {str(e)}', exc_info=True)
             return jsonify({
@@ -148,36 +149,36 @@ def register_chat_routes(app):
         try:
             if 'file' not in request.files:
                 return jsonify({'error': 'No file provided'}), 400
-                
+
             file = request.files['file']
             if not file or not file.filename:
                 return jsonify({'error': 'Invalid file'}), 400
-                
+
             # Validate file type
             if not any(file.content_type.startswith(t) for t in FILE_UPLOAD_SETTINGS['allowed_mime_types']):
                 return jsonify({
                     'error': f'Invalid file type. Allowed types: {FILE_UPLOAD_SETTINGS["allowed_mime_types"]}'
                 }), 400
-                
+
             # Validate file size
             if file.content_length > FILE_UPLOAD_SETTINGS['max_file_size']:
                 return jsonify({
                     'error': f'File too large. Maximum size: {FILE_UPLOAD_SETTINGS["max_file_size"]} bytes'
                 }), 400
-            
+
             api_config = APIConfig()
             file_url = api_config.get_api_url('/chat/file')
             headers = api_config.get_auth_headers()
-            
+
             # Remove Content-Type from headers as it will be set by requests for multipart/form-data
             headers.pop('Content-Type', None)
-            
+
             logger.debug(f'Sending file to server URL: {file_url}')
-            
+
             # Prepare the files and data
             files = {'file': (secure_filename(file.filename), file, file.content_type)}
             data = {'message': request.form.get('message', '')}
-            
+
             # Send file to server
             response = requests.post(
                 file_url,
@@ -186,7 +187,7 @@ def register_chat_routes(app):
                 data=data,
                 timeout=30  # Longer timeout for file uploads
             )
-            
+
             if response.status_code == 200:
                 response_data = response.json()
                 logger.info('Successfully sent file and received response')
@@ -194,7 +195,7 @@ def register_chat_routes(app):
             else:
                 logger.error(f'Failed to send file. Server returned status {response.status_code}')
                 return jsonify(response.json()), response.status_code
-                
+
         except requests.RequestException as e:
             logger.error(f'Error sending file to server: {str(e)}', exc_info=True)
             return jsonify({

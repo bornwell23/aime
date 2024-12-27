@@ -11,6 +11,7 @@ from src.database import get_db
 
 auth_router = APIRouter()
 
+
 @auth_router.post("/token", response_model=schemas.Token)
 async def login_for_access_token(
     request: Request,
@@ -23,10 +24,10 @@ async def login_for_access_token(
     json_data = await request.json()
     username = json_data.get('username', None)
     password = json_data.get('password', None)
-    
+
     # Log the incoming request details for debugging
     logger.info(f"Token request received - Username: {username}")
-    
+
     # Validate input explicitly
     if not username or not password:
         logger.warning("Login attempt with empty username or password")
@@ -35,7 +36,7 @@ async def login_for_access_token(
             detail="Username and password are required",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     # Authenticate user
     user = crud.authenticate_user(db, username, password)
     if not user:
@@ -45,21 +46,22 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     # Create access token
     access_token_expires = timedelta(minutes=security.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    
+
     # Log successful token creation
     logger.info(f"Access token created for user: {user.username}")
-    
+
     return schemas.Token(
         access_token=access_token,
         token_type="bearer",
         id=user.id
     )
+
 
 @auth_router.post("/token/refresh", response_model=schemas.Token)
 def refresh_access_token(
@@ -73,14 +75,14 @@ def refresh_access_token(
         # Decode the current token to get username
         payload = security.decode_token(token.token)
         username = payload.get("sub")
-        
+
         if not username:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
         # Verify user exists
         user = crud.get_user_by_username(db, username)
         if not user:
@@ -89,7 +91,7 @@ def refresh_access_token(
                 detail="User not found",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
         # Create a new access token
         access_token_expires = timedelta(minutes=security.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = security.create_access_token(
@@ -100,13 +102,14 @@ def refresh_access_token(
             token_type="bearer",
             id=user.id
         )
-    
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not refresh token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
 
 @auth_router.post("/logout")
 async def logout(token: str = Depends(security.oauth2_scheme)):
@@ -123,9 +126,10 @@ async def logout(token: str = Depends(security.oauth2_scheme)):
     logger.info("User logged out")
     return {"message": "Successfully logged out"}
 
+
 @auth_router.post("/register", response_model=schemas.UserResponse)
 async def register_user(
-    user: schemas.UserCreate, 
+    user: schemas.UserCreate,
     db: Session = Depends(get_db)
 ):
     """
@@ -138,8 +142,8 @@ async def register_user(
         # Validate user input
         try:
             validated_user = schemas.UserCreate(
-                username=user.username, 
-                email=user.email, 
+                username=user.username,
+                email=user.email,
                 password=user.password
             )
         except ValueError as val_err:

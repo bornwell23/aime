@@ -31,7 +31,7 @@ def read_users_me(
             raise credentials_exception
     except Exception:
         raise credentials_exception
-    
+
     # Retrieve user details
     user = crud.get_user_by_username(db, username=username)
     if user is None:
@@ -41,14 +41,14 @@ def read_users_me(
 
 @user_router.put("/update/{user_id}", response_model=schemas.UserResponse)
 def update_user(
-    user_id: int, 
-    user_update: schemas.UserUpdate, 
+    user_id: int,
+    user_update: schemas.UserUpdate,
     token: str = Depends(security.oauth2_scheme),
     db: Session = Depends(get_db)
 ):
     """
     Update user details with authorization check
-    
+
     - Verifies the requesting user is either:
       1. The user being updated (self)
       2. A superuser
@@ -59,7 +59,7 @@ def update_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     try:
         # Decode the token to get username
         payload = security.decode_token(token)
@@ -68,19 +68,19 @@ def update_user(
             raise credentials_exception
     except Exception:
         raise credentials_exception
-    
+
     # Get the requesting user
     requesting_user = crud.get_user_by_username(db, username=requesting_username)
     if requesting_user is None:
         raise credentials_exception
-    
+
     # Check if user is updating themselves or is a superuser
     if requesting_user.id != user_id and not requesting_user.is_superuser:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to update this user"
         )
-    
+
     # Perform the update
     try:
         updated_user = crud.update_user(db, user_id, user_update)

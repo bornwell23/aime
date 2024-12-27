@@ -1,4 +1,9 @@
-#3rd party imports
+# 3rd party imports
+from src.routes.user import user_router
+from src.routes.auth import auth_router
+from src.routes.health import health_router
+from src.database import engine, check_database_health
+from src import models
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from common.logging import logger
@@ -6,9 +11,7 @@ from common.logging import logger
 # Configure logging
 logger.update_name("auth-service")
 
-#project imports
-from src import models
-from src.database import engine, check_database_health
+# project imports
 
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
@@ -26,9 +29,6 @@ app.add_middleware(
 )
 
 # Import routers
-from src.routes.health import health_router
-from src.routes.auth import auth_router
-from src.routes.user import user_router
 
 # Include routers
 app.include_router(health_router, tags=["Health"])

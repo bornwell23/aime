@@ -3,6 +3,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from common.logging import logger
 from services.account import AccountManager
 
+
 def register_auth_routes(app):
     account_manager = AccountManager()
 
@@ -10,7 +11,7 @@ def register_auth_routes(app):
     def login():
         """Handle user login"""
         if current_user.is_authenticated:
-            logger.info(f"User already authenticated, redirecting to home")
+            logger.info(f"User {current_user} already authenticated, redirecting to home")
             return redirect(url_for('home'))
 
         if request.method == 'POST':
@@ -51,8 +52,8 @@ def register_auth_routes(app):
             if success:
                 # Pass a success message to the login page
                 return redirect(url_for('login', success_message='Registration successful! Please log in.'))
-            return render_template('register.html', error=error_message)
-        return render_template('register.html')
+            return render_template('register.html', error=message)
+        return render_template('register.html', error="Unknown error during registration")
 
     @app.route('/logout')
     @login_required
@@ -62,11 +63,11 @@ def register_auth_routes(app):
             user_id = current_user.id
             username = current_user.username
             roles = current_user.roles
-            
+
             account_manager.logout(user_id)
             logout_user()
-            
+
             logger.info(f"Logged out user: {username} (roles: {roles})")
             flash('You have been logged out.', 'info')
-        
+
         return redirect(url_for('login'))

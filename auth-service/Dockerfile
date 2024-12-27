@@ -25,7 +25,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
 # Run syntax checks
 RUN echo "Running syntax checks..." && python -m compileall .
 RUN echo "Running flake8..." && flake8 --ignore=W293,E501,F841 .
-RUN echo "Running pylint..." && pylint --disable=C,R,W --enable=E --ignore=tests ./*.py
+RUN echo "Running pylint..." && pylint --disable=C,R,W --enable=E --ignore=tests .
 
 # Expose the port the app runs on
 EXPOSE 8000

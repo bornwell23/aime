@@ -1,4 +1,4 @@
-#3rd party imports
+# 3rd party imports
 import os
 from datetime import datetime, timedelta
 from typing import Optional
@@ -31,13 +31,13 @@ def validate_password(password: str) -> bool:
     """
     if len(password) < PASSWORD_MIN_LENGTH:
         return 1
-    
+
     if PASSWORD_REQUIRE_SPECIAL_CHARS and not any(char in '!@#$%^&*()_+-=[]{}|;:,.<>?' for char in password):
         return 2
-    
+
     if PASSWORD_REQUIRE_NUMBERS and not any(char.isdigit() for char in password):
         return 3
-    
+
     return 0
 
 

@@ -79,3 +79,31 @@ def verify_token():
     except Exception as error:
         logger.error(f'Error in verify endpoint: {str(error)}')
         return jsonify({'error': str(error)}), 500
+
+
+@auth_router.route('/logout', methods=['POST'])
+def logout():
+    try:
+        logger.info('Proxying logout request to auth service')
+        auth_service_url = f"http://{os.getenv('AUTH_SERVICE_HOST', 'auth-service')}:{os.getenv('AUTH_SERVICE_PORT', '8000')}/logout"
+
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            logger.warn('Missing or invalid Authorization header in logout request')
+            return jsonify({'error': 'Missing or invalid Authorization header'}), 401
+
+        token = auth_header.split(' ')[1]
+        response = requests.post(
+            auth_service_url,
+            json={'token': token},
+            headers={'Content-Type': 'application/json'}
+        )
+
+        return jsonify(response.json()), response.status_code
+
+    except requests.RequestException as error:
+        logger.error(f'Error connecting to auth service during logout: {str(error)}')
+        return jsonify({'error': 'Authentication service unavailable'}), 503
+    except Exception as error:
+        logger.error(f'Error in logout endpoint: {str(error)}')
+        return jsonify({'error': str(error)}), 500

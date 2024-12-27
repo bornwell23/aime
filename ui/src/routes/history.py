@@ -4,6 +4,7 @@ import requests
 from common.logging import logger
 from services.api_config import APIConfig
 
+
 def register_history_routes(app):
     @app.route('/api/history')
     @login_required
@@ -17,12 +18,12 @@ def register_history_routes(app):
         try:
             api_config = APIConfig()
             history_url = api_config.get_api_url('/history')
-            
+
             logger.debug(f'Fetching history from server URL: {history_url}')
-            
+
             # Make request to server's history endpoint
             response = requests.get(history_url, timeout=10)
-            
+
             if response.status_code == 200:
                 history_data = response.json()
                 logger.info(f'Successfully retrieved {len(history_data)} history items')
@@ -33,7 +34,7 @@ def register_history_routes(app):
                     'error': 'Failed to retrieve history',
                     'status_code': response.status_code
                 }), 500
-        
+
         except requests.RequestException as e:
             logger.error(f'Error fetching history from server: {str(e)}', exc_info=True)
             return jsonify({

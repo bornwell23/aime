@@ -92,3 +92,36 @@ npm start
 - The database is automatically created during container startup
 - Connection details are configured in `docker-compose.yml`
 - Database connection is tested during server initialization
+
+## Testing Docker Builds
+
+### `test_docker_builds.py`
+
+This script is used to validate and fix Docker image builds for services in the project.
+
+#### Usage
+
+```bash
+python test_docker_builds.py [--fix] [--dontfix] [service_name]
+```
+
+##### Options
+- `--fix`: Automatically fix PEP8 issues in Python files
+- `--dontfix`: Run checks without fixing files - default functionality
+- `service_name`: (Optional) Specify a specific service to build/check. If not provided, all services will be processed.
+
+##### Example Commands
+- Check all services: `python test_docker_builds.py`
+- Check a specific service: `python test_docker_builds.py server`
+- Fix PEP8 issues: `python test_docker_builds.py --fix`
+
+#### Features
+- Runs Docker image builds
+- Checks Python code syntax using Flake8 and Pylint
+- Optionally fixes PEP8 style issues
+- Generates detailed logs in `test/logs/` directory
+
+#### Logging
+- Logs are saved in timestamped directories under `test/logs/`
+- Includes console and file logging
+- Diff logs show code changes when fixing PEP8 issues

@@ -5,7 +5,7 @@ set -e
 sleep 5
 
 # Initialize database
-python init_db.py
+python database.py
 
 # Start Nginx
 nginx &

@@ -1,9 +1,13 @@
-# Test stage for syntax checking
-FROM python:3.11-slim AS test
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install dependencies including syntax checkers
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    nginx \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
 COPY ui/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt \
     && pip install --no-cache-dir flake8 pylint
@@ -12,34 +16,18 @@ RUN pip install --no-cache-dir -r requirements.txt \
 COPY ui/src/ .
 COPY common /app/common
 
-# Set Python path for imports
-ENV PYTHONPATH=/app
-
 # Run syntax checks
 RUN echo "Running syntax checks..." && python -m compileall .
 RUN echo "Running flake8..." && flake8 --ignore=W293,E501,F841 .
-RUN echo "Running pylint..." && pylint --disable=C,R,W --enable=E --ignore=tests ./*.py
-
-# Final stage
-FROM python:3.11-slim
-
-WORKDIR /app
-
-# Install dependencies
-COPY ui/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code
-COPY ui/src/ .
-COPY common /app/common
+RUN echo "Running pylint..." && pylint --disable=C,R,W --enable=E --ignore=tests .
 
 # Set environment variables
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
 ENV PYTHONPATH=/app
 
-# Expose port
+# Expose ports
 EXPOSE 3000
 
-# Run the application
+# Start Nginx and Gunicorn
 CMD ["python", "app.py"]
